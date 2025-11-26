@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+body{
+    overflow-x:hidden;
+}
+
+/* small UI niceties */
+body {
+  background: #f3f4f6; /* gray-100 */
+}
+.ant-layout {
+  min-height: 100vh;
+}
