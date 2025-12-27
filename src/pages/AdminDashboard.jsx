@@ -1,327 +1,175 @@
-import React, { useEffect, useState, useContext } from "react";
-import {
-  Card,
-  Table,
-  Button,
-  Tooltip,
-  Modal,
-  Input,
-  DatePicker,
-  notification,
-} from "antd";
-import {
-  CheckSquareOutlined,
-  DollarCircleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import axios from "axios";
-import { socket } from "../utils/socket.io";
-import { AuthContext } from "../context/AuthContext";
+import React, { useState } from 'react';
+import { Layout, Menu, Button, theme, Avatar, Dropdown, Card, Statistic, Row, Col } from 'antd';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, User, MessageSquare, ListTodo, Video, Monitor, Power,
+  CalendarPlus, DollarSign, Megaphone, Activity 
+} from 'lucide-react';
+import { useAuth } from '../App'; 
+
+// Import Admin Feature Components
+import ActiveSessions from '../components/admin/ActiveSessions'; 
+import TaskManager from '../components/admin/TaskManager';
+import MeetingManager from '../components/meetings/MeetingManager';
+import AdminChat from '../components/admin/AdminChat';
+import ScreenMonitor from '../components/admin/ScreenMonitor';
+import FineManager from '../components/admin/FineManager'; 
+import EventManagerPanel from '../components/shared/EventManagerPanel'; 
+import AnnouncementManagerPanel from '../components/shared/AnnouncementManagerPanel';
+import ActivityLogs from "../components/admin/ActivityLogs.jsx";
+
+const { Header, Content, Sider } = Layout;
+
+// Navigation Items
+const menuItems = [
+  { key: 'overview', icon: <LayoutDashboard />, label: 'Overview' },
+  { key: 'sessions', icon: <User />, label: 'Active Sessions' },
+  { key: 'activity', icon: <Activity />, label: 'Activity Logs' },
+  { key: 'monitoring', icon: <Monitor />, label: 'Live Monitoring' },
+  { key: 'tasks', icon: <ListTodo />, label: 'Task Manager' },
+  { key: 'meetings', icon: <Video />, label: 'Meeting Manager' },
+  { key: 'events', icon: <CalendarPlus />, label: 'Event Manager' },
+  { key: 'fines', icon: <DollarSign />, label: 'Fine Manager' },
+  { key: 'announcements', icon: <Megaphone />, label: 'Announcements' },
+  { key: 'chat', icon: <MessageSquare />, label: 'Global Chat' },
+];
 
 export default function AdminDashboard() {
-  const { logout } = useContext(AuthContext);
-  const [users, setUsers] = useState([]);
-  const [taskModal, setTaskModal] = useState(false);
-  const [fineModal, setFineModal] = useState(false);
-  const [activityModal, setActivityModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { token: antdToken } = theme.useToken();
 
-  const [taskForm, setTaskForm] = useState({
-    title: "",
-    description: "",
-    dueDate: null,
-  });
-  const [fineForm, setFineForm] = useState({ reason: "", amount: "" });
-  const [streams, setStreams] = useState([]);
+  const pathParts = location.pathname.split('/');
+  const currentKey = pathParts[pathParts.length - 1] || 'overview';
 
-  const api = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await axios.get(`${api}/api/admin/users`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setUsers(res.data.users || []);
-      } catch (err) {
-        console.warn(err);
-      }
-    };
-    fetch();
-  }, []);
-
-  // Socket listeners for activity
-  useEffect(() => {
-    const handleSessionStarted = ({ userId, sessionId }) => {
-      if (selectedUser && userId === selectedUser._id) {
-        setStreams((prev) => [{ sessionId, userId }, ...prev]);
-        notification.info({
-          message: "Session started",
-          description: `User ${userId} started session`,
-        });
-      }
-    };
-
-    const handleSessionStopped = ({ session }) => {
-      setStreams((prev) => prev.filter((s) => s.sessionId !== session._id));
-      notification.info({
-        message: "Session stopped",
-        description: `Session ended`,
-      });
-    };
-
-    const handleEmployeeIdle = ({ userId }) => {
-      if (selectedUser && userId === selectedUser._id) {
-        notification.warning({
-          message: "Employee Idle",
-          description: `User ${userId} has been idle`,
-        });
-      }
-    };
-
-    socket.on("session:started", handleSessionStarted);
-    socket.on("session:stopped", handleSessionStopped);
-    socket.on("employee:idle", handleEmployeeIdle);
-
-    return () => {
-      socket.off("session:started", handleSessionStarted);
-      socket.off("session:stopped", handleSessionStopped);
-      socket.off("employee:idle", handleEmployeeIdle);
-    };
-  }, [selectedUser]);
-
-  const openTaskModal = (user) => {
-    setSelectedUser(user);
-    setTaskModal(true);
+  const handleMenuClick = ({ key }) => {
+    key === 'overview' ? navigate('/admin') : navigate(`/admin/${key}`);
   };
 
-  const openFineModal = (user) => {
-    setSelectedUser(user);
-    setFineModal(true);
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
   };
 
-  const openActivityModal = (user) => {
-    setSelectedUser(user);
-    setStreams([]); // reset streams for fresh view
-    setActivityModal(true);
-  };
-
-  const assignTask = async () => {
-    if (!taskForm.title || !taskForm.description || !taskForm.dueDate) {
-      return notification.warning({ message: "Please fill all task fields" });
-    }
-    try {
-      await axios.post(
-        `${api}/api/tasks`,
-        { ...taskForm, assignedTo: selectedUser._id },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      notification.success({ message: "Task assigned successfully!" });
-      setTaskModal(false);
-      setTaskForm({ title: "", description: "", dueDate: null });
-    } catch (err) {
-      console.error("Task assign error:", err.response?.data || err.message);
-      notification.error({ message: "Failed to assign task" });
-    }
-  };
-
-  const assignFine = async () => {
-    if (!fineForm.reason || !fineForm.amount) {
-      return notification.warning({ message: "Please fill all fine fields" });
-    }
-    try {
-      const res = await axios.post(
-        `${api}/api/fines`,
-        { reason: fineForm.reason, amount: Number(fineForm.amount), assignedTo: selectedUser._id },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      notification.success({ message: "Fine assigned successfully!" });
-
-      // Emit socket event so employee dashboard updates in real-time
-      socket.emit("fine:assigned", { fine: res.data.fine });
-
-      setFineModal(false);
-      setFineForm({ reason: "", amount: "" });
-    } catch (err) {
-      console.error("Fine assign error:", err.response?.data || err.message);
-      notification.error({ message: "Failed to assign fine" });
-    }
-  };
-
-  const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Email", dataIndex: "email", key: "email" },
-    { title: "Role", dataIndex: "role", key: "role" },
+  // ✅ FIXED DROPDOWN (NO overlay)
+  const userDropdownItems = [
     {
-      title: "Online",
-      dataIndex: "online",
-      key: "online",
-      render: (o) => (o ? "Online" : "Offline"),
+      key: 'profile',
+      label: `Admin: ${user?.name || 'User'}`,
+      disabled: true,
     },
+    { type: 'divider' },
     {
-      title: "Last Seen",
-      dataIndex: "lastSeen",
-      key: "lastSeen",
-      render: (val, record) =>
-        record.role !== "admin" ? new Date(val).toLocaleString() : "—",
-    },
-    {
-      title: "Tasks",
-      key: "tasks",
-      render: (_, record) => (
-        <Tooltip title="Assign Task">
-          <Button
-            type="text"
-            icon={<CheckSquareOutlined style={{ fontSize: 20, color: "black" }} />}
-            onClick={() => openTaskModal(record)}
-            className="hover:bg-gray-200 rounded-full"
-          />
-        </Tooltip>
-      ),
-    },
-    {
-      title: "Fines",
-      key: "fines",
-      render: (_, record) => (
-        <Tooltip title="Assign Fine">
-          <Button
-            type="text"
-            icon={<DollarCircleOutlined style={{ fontSize: 20, color: "black" }} />}
-            onClick={() => openFineModal(record)}
-            className="hover:bg-gray-200 rounded-full"
-          />
-        </Tooltip>
-      ),
-    },
-    {
-      title: "Activity",
-      key: "activity",
-      render: (_, record) => (
-        <Tooltip title="View Activity">
-          <Button
-            type="text"
-            icon={<EyeOutlined style={{ fontSize: 20, color: "black" }} />}
-            onClick={() => openActivityModal(record)}
-            className="hover:bg-gray-200 rounded-full"
-          />
-        </Tooltip>
-      ),
+      key: 'logout',
+      label: 'Logout',
+      icon: <Power className="w-4 h-4" />,
+      danger: true,
+      onClick: handleLogout,
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className=" text-2xl md:text-4xl font-bold m-10 text-[#083b75]">
-        Admin Dashboard
-      </h1>
-
-      <div className="grid lg:grid-cols-3 gap-4 justify-evenly">
-        <div className="m-[5px] ml-10">
-          <Card>
-            <div className="text-sm text-gray-500">Total Users</div>
-            <div className="text-2xl">{users.length}</div>
-          </Card>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        breakpoint="lg"
+        collapsedWidth="80"
+        style={{
+          overflow: 'auto',
+          height: '100vh',
+          position: 'fixed',
+          backgroundColor: '#1E293B',
+        }}
+        className="border-r border-white/20"
+      >
+        <div className="p-4 flex justify-center h-[64px]">
+          <h1 className="text-white text-xl font-bold">
+            {collapsed ? 'MH' : 'MonitorHub Hub'}
+          </h1>
         </div>
 
-        <div className="mt-[5px]">
-          <Card>
-            <div className="text-sm text-gray-500">Active Sessions</div>
-            <div className="text-2xl">—</div>
-          </Card>
-        </div>
-      </div>
-
-      <Card>
-        <Table dataSource={users} columns={columns} rowKey="_id" />
-      </Card>
-
-      {/* Activity Modal */}
-      <Modal
-        title={`Activity of ${selectedUser?.name}`}
-        open={activityModal}
-        onCancel={() => setActivityModal(false)}
-        footer={null}
-        centered
-        maskStyle={{ backdropFilter: "blur(2px)" }}
-        width={800}
-      >
-        <div className="grid gap-6">
-          {/* Live View */}
-          <Card className="lg:col-span-2">
-            <h3 className="font-semibold">Live View</h3>
-            <div className="aspect-video bg-gray-900 rounded mt-3"></div>
-          </Card>
-        </div>
-      </Modal>
-
-           {/* Task Modal */}
-      <Modal
-        title={`Assign Task to ${selectedUser?.name}`}
-        open={taskModal}
-        onOk={assignTask}
-        onCancel={() => setTaskModal(false)}
-        okText="Assign Task"
-        centered
-        maskStyle={{ backdropFilter: "blur(2px)" }}
-      >
-        <label className="font-medium">Task Title</label>
-        <Input
-          placeholder="Enter task title"
-          value={taskForm.title}
-          onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
-          className="mb-3"
+        <Menu
+          theme="dark"
+          selectedKeys={[currentKey]}
+          mode="inline"
+          onClick={handleMenuClick}
+          items={menuItems}
+          className="!bg-transparent"
         />
+      </Sider>
 
-        <label className="font-medium">Description</label>
-        <Input.TextArea
-          placeholder="Enter task description"
-          value={taskForm.description}
-          onChange={(e) =>
-            setTaskForm({ ...taskForm, description: e.target.value })
-          }
-          className="mb-3"
-        />
+      <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
+        <Header className="!bg-gray-800 flex justify-between px-6 border-b border-white/20">
+          <h2 className="text-white text-xl font-semibold">
+            Admin Dashboard | {menuItems.find(i => i.key === currentKey)?.label || 'Overview'}
+          </h2>
 
-        <label className="font-medium">Last Submission Date</label>
-        <DatePicker
-          className="w-full mb-3"
-          onChange={(date) => setTaskForm({ ...taskForm, dueDate: date })}
-        />
-      </Modal>
+          <Dropdown menu={{ items: userDropdownItems }} trigger={['click']}>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <Avatar style={{ backgroundColor: '#87d068' }} icon={<User />} />
+              <span className="text-white hidden sm:block">{user?.name}</span>
+            </div>
+          </Dropdown>
+        </Header>
 
-      {/* Fine Modal */}
-      <Modal
-        title={`Assign Fine to ${selectedUser?.name}`}
-        open={fineModal}
-        onOk={assignFine}
-        onCancel={() => setFineModal(false)}
-        okText="Assign Fine"
-        centered
-        maskStyle={{ backdropFilter: "blur(2px)" }}
-      >
-        <label className="font-medium">Fine Reason</label>
-        <Input
-          placeholder="Enter fine reason"
-          value={fineForm.reason}
-          onChange={(e) => setFineForm({ ...fineForm, reason: e.target.value })}
-          className="mb-3"
-        />
-
-        <label className="font-medium">Fine Amount</label>
-        <Input
-          type="number"
-          placeholder="Enter fine amount"
-          value={fineForm.amount}
-          onChange={(e) =>
-            setFineForm({ ...fineForm, amount: Number(e.target.value) })
-          }
-          className="mb-3"
-        />
-      </Modal>
-    </div>
+        <Content className="p-6 bg-gray-800">
+          <Routes>
+            <Route path="/" element={<OverviewDashboard user={user} />} />
+            <Route path="sessions" element={<ActiveSessions token={token} />} />
+            <Route path="activity" element={<ActivityLogs token={token} isAdmin />} />
+            <Route path="monitoring" element={<ScreenMonitor token={token} />} />
+            <Route path="tasks" element={<TaskManager token={token} />} />
+            <Route path="meetings" element={<MeetingManager token={token} />} />
+            <Route path="events" element={<EventManagerPanel token={token} isAdmin />} />
+            <Route path="fines" element={<FineManager token={token} />} />
+            <Route path="announcements" element={<AnnouncementManagerPanel token={token} isAdmin />} />
+            <Route path="chat" element={<AdminChat userId={user?._id} userName={user?.name} token={token} />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Content>
+      </Layout>
+    </Layout>
   );
 }
+
+/* ---------- OVERVIEW ---------- */
+
+const adminStats = [
+  { title: 'Active Sessions', value: 45, icon: <User />, suffix: '/50' },
+  { title: 'Pending Tasks', value: 12, icon: <ListTodo />, suffix: ' urgent' },
+  { title: 'Total Fines', value: 18000, icon: <DollarSign />, prefix: 'PKR ' },
+  { title: 'Upcoming Meetings', value: 3, icon: <Video />, suffix: ' today' },
+  { title: 'New Announcements', value: 5, icon: <Megaphone />, suffix: ' unread' },
+];
+
+const OverviewDashboard = ({ user }) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="space-y-8">
+      <div className="p-8 bg-gray-700 rounded-xl">
+        <h1 className="text-4xl font-bold text-white">MonitorHub Admin Dashboard</h1>
+        <p className="text-blue-300">Welcome back, {user?.name}</p>
+      </div>
+
+      <Row gutter={[24, 24]}>
+        {adminStats.map((s, i) => (
+          <Col xs={24} sm={12} lg={8} xl={4} key={i}>
+            <Card className="!bg-gray-800 border-gray-700">
+              <Statistic title={s.title} value={s.value} prefix={s.prefix} suffix={s.suffix} />
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </div>
+  );
+};
+
+const NotFound = () => (
+  <div className="text-white p-8">Admin Feature Not Found.</div>
+);

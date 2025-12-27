@@ -1,13 +1,127 @@
+/* Tailwind */
 @import "tailwindcss";
 
-body{
-    overflow-x:hidden;
+/* Global font */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+body {
+  overflow-x: hidden;
+  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, Segoe UI,
+    Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  background-color: #f7fafc;
 }
 
-/* small UI niceties */
-body {
-  background: #f3f4f6; /* gray-100 */
-}
 .ant-layout {
   min-height: 100vh;
+}
+
+/* Remember checkbox */
+.remember-check .ant-checkbox-inner {
+  background-color: black !important;
+  border-color: #f3f8fc !important;
+}
+
+.remember-check .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: black !important;
+  border-color: #f3f8fc !important;
+}
+
+.remember-check .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: white !important;
+}
+
+/* Admin menu */
+.custom-admin-menu.ant-menu-dark .ant-menu-item-selected {
+  background-color: transparent !important;
+  color: #38bdf8 !important;
+}
+
+.custom-admin-menu .ant-menu-item-selected::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 3px;
+  background-color: #38bdf8;
+  border-radius: 2px;
+}
+
+/* Sider trigger */
+.ant-layout-sider-trigger {
+  background-color: #1e293b !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #38bdf8 !important;
+}
+
+/* Date Picker Dark Mode */
+.digital-dark-picker .ant-picker-panel-container {
+  background: #09090b !important;
+  border: 1px solid #27272a !important;
+  border-radius: 8px;
+}
+
+.digital-dark-picker .ant-picker-content th,
+.digital-dark-picker .ant-picker-cell {
+  color: #a1a1aa !important;
+}
+
+.digital-dark-picker .ant-picker-cell-in-view {
+  color: #ffffff !important;
+}
+
+.digital-dark-picker .ant-picker-cell-selected .ant-picker-cell-inner {
+  background: #06b6d4 !important;
+  border-radius: 4px;
+}
+
+.digital-dark-picker .ant-picker-header {
+  color: #ffffff !important;
+  border-bottom: 1px solid #27272a !important;
+}
+
+/* DARK TABLE (use className="dark-table") */
+.dark-table .ant-table,
+.dark-table .ant-table-container,
+.dark-table .ant-table-thead > tr > th,
+.dark-table .ant-table-cell {
+  background-color: #000 !important;
+  color: #fff !important;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.dark-table .ant-table-thead > tr > th {
+  background-color: #111 !important;
+  border-bottom: 1px solid #333;
+}
+
+.dark-table .ant-table-tbody > tr > td {
+  background-color: #000 !important;
+  border-bottom: 1px solid #333;
+}
+
+.dark-table .ant-table-tbody > tr:hover > td {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+}
+
+/* Pagination */
+.dark-table .ant-pagination-item,
+.dark-table .ant-pagination-prev,
+.dark-table .ant-pagination-next {
+  background-color: #111;
+  color: white;
+  border: none;
+}
+
+.dark-table .ant-pagination-item-active {
+  background-color: #333;
+  color: white;
+}
+
+/* Remove button glow */
+.ant-btn:focus,
+.ant-btn:active {
+  box-shadow: none !important;
+  outline: none !important;
 }
