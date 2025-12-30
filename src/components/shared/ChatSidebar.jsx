@@ -2,17 +2,18 @@ import React, { useEffect, useState, useRef } from "react";
 import { 
   Menu, Spin, Typography, Input, Button, 
   Dropdown, Avatar, Badge, Tooltip, Modal, 
-  Form, Select, Tag, Divider 
+  Form, Select, Tag, Divider, message
 } from "antd";
 import { 
-  Search, Plus, Users, Globe, User, // ADD 'Plus' HERE
+  Search, Plus, Users, Globe, User, 
   Shield, MoreVertical, MessageSquare,
   Video, Phone, Edit2, Trash2, Pin,
   Check, CheckCheck, Clock, Hash,
   Volume2, VolumeX
 } from "lucide-react";
 import { api, authHeader } from "../../utils/api";
-import "../styles/ChatPanel.css";
+import moment from "moment";
+import "../styles/ChatSidebar.css";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -34,6 +35,7 @@ export default function ChatSidebar({
   const [searchQuery, setSearchQuery] = useState("");
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [renameModal, setRenameModal] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
   const [groupForm] = Form.useForm();
   const searchRef = useRef(null);
 
@@ -61,6 +63,7 @@ export default function ChatSidebar({
       setFilteredUsers(res.data);
     } catch (error) {
       console.error("Failed to load users:", error);
+      message.error("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -69,7 +72,7 @@ export default function ChatSidebar({
   const handleCreateGroup = async (values) => {
     try {
       const res = await api.post(
-        "/api/chat/create-group",
+        "/api/chat/rooms/create",
         values,
         authHeader(token)
       );
@@ -78,30 +81,33 @@ export default function ChatSidebar({
       groupForm.resetFields();
       message.success("Group created successfully!");
     } catch (error) {
+      console.error("Create group error:", error);
       message.error("Failed to create group");
     }
   };
 
-  const handleRenameChat = async (newName) => {
-    if (!selectedRoom) return;
+  const handleRenameChat = async () => {
+    if (!selectedRoom || !newGroupName.trim()) return;
     
     try {
       await api.put(
         `/api/chat/rename/${selectedRoom._id}`,
-        { name: newName },
+        { name: newGroupName },
         authHeader(token)
       );
       
       setUsers(users.map(user => 
         user._id === selectedRoom._id 
-          ? { ...user, name: newName }
+          ? { ...user, name: newGroupName }
           : user
       ));
       
-      setSelectedRoom({ ...selectedRoom, name: newName });
+      setSelectedRoom({ ...selectedRoom, name: newGroupName });
       setRenameModal(false);
+      setNewGroupName("");
       message.success("Chat renamed!");
     } catch (error) {
+      console.error("Rename error:", error);
       message.error("Failed to rename chat");
     }
   };
@@ -133,18 +139,20 @@ export default function ChatSidebar({
               name: user.name,
               isDM: !user.isGroup,
               isGroup: user.isGroup,
-              avatar: user.avatar
+              avatar: user.avatar,
+              online: user.online,
+              lastSeen: user.lastSeen
             });
           }
         }
       },
-      user._id !== "global" && {
+      user._id !== "global" && user._id !== userId && {
         key: 'call',
         label: 'Voice Call',
         icon: <Phone size={14} />,
         onClick: () => onStartCall && onStartCall(user._id)
       },
-      user._id !== "global" && {
+      user._id !== "global" && user._id !== userId && {
         key: 'video',
         label: 'Video Call',
         icon: <Video size={14} />,
@@ -154,7 +162,10 @@ export default function ChatSidebar({
         key: 'rename',
         label: 'Rename Group',
         icon: <Edit2 size={14} />,
-        onClick: () => setRenameModal(true)
+        onClick: () => {
+          setNewGroupName(user.name);
+          setRenameModal(true);
+        }
       },
       user._id !== "global" && user._id !== userId && {
         key: 'mute',
@@ -225,7 +236,9 @@ export default function ChatSidebar({
                   name: user.name,
                   isDM: !user.isGroup,
                   isGroup: user.isGroup,
-                  avatar: user.avatar
+                  avatar: user.avatar,
+                  online: user.online,
+                  lastSeen: user.lastSeen
                 });
                 onClearUnread && onClearUnread(user._id);
               }
@@ -260,7 +273,7 @@ export default function ChatSidebar({
               <div className="chat-preview">
                 <span className="chat-last-msg">
                   {user.lastMessage 
-                    ? `${user.lastMessage.sender}: ${user.lastMessage.text}`
+                    ? `${user.lastMessage.sender}: ${user.lastMessage.text.substring(0, 30)}${user.lastMessage.text.length > 30 ? '...' : ''}`
                     : "No messages yet"}
                 </span>
                 {unreadCounts[user._id] > 0 && (
@@ -319,7 +332,7 @@ export default function ChatSidebar({
               mode="multiple"
               placeholder="Select members"
               options={users
-                .filter(u => u._id !== userId && u._id !== "global")
+                .filter(u => u._id !== userId && u._id !== "global" && !u.isGroup)
                 .map(u => ({
                   label: u.name,
                   value: u._id,
@@ -334,6 +347,17 @@ export default function ChatSidebar({
             />
           </Form.Item>
           
+          <Form.Item name="description">
+            <TextArea placeholder="Group description (optional)" rows={2} />
+          </Form.Item>
+          
+          <Form.Item name="isPublic" valuePropName="checked">
+            <div>
+              <input type="checkbox" id="isPublic" />
+              <label htmlFor="isPublic" className="ml-2">Public group (anyone can join)</label>
+            </div>
+          </Form.Item>
+          
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
               Create Group
@@ -346,15 +370,19 @@ export default function ChatSidebar({
       <Modal
         title="Rename Chat"
         open={renameModal}
-        onCancel={() => setRenameModal(false)}
-        onOk={() => {
-          const newName = prompt("Enter new name:");
-          if (newName) handleRenameChat(newName);
+        onCancel={() => {
+          setRenameModal(false);
+          setNewGroupName("");
         }}
+        onOk={handleRenameChat}
+        okText="Rename"
+        cancelText="Cancel"
       >
         <Input
           placeholder="Enter new chat name"
-          onPressEnter={(e) => handleRenameChat(e.target.value)}
+          value={newGroupName}
+          onChange={(e) => setNewGroupName(e.target.value)}
+          onPressEnter={handleRenameChat}
         />
       </Modal>
     </div>
