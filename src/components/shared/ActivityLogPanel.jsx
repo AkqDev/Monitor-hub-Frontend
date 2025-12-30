@@ -13,7 +13,7 @@ const actionColors = {
     'FINE_PAID': 'green',
     'EVENT_CREATED': 'purple',
     'USER_LOGIN': 'lime',
-    'USER_LOGOUT': 'red', // Added logout color
+    'USER_LOGOUT': 'red', 
 };
 
 export default function ActivityLogPanel({ token, isAdmin = false }) {
@@ -46,7 +46,7 @@ export default function ActivityLogPanel({ token, isAdmin = false }) {
     return (
         <Card
             title={<div className="flex items-center gap-2 text-gray-400 font-semibold"><History className='w-5 h-5 text-gray-400' /> {isAdmin ? 'System Activity Feed' : 'My Recent Activity'}</div>}
-            className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 activity-card"
+            className="!bg-black/25 backdrop-blur-xl rounded-2xl border border-white/20 activity-card"
             // FIX: Added Ant Design specific styles to ensure dark theme compatibility
             headStyle={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff' }}
             bodyStyle={{ padding: 0 }}
