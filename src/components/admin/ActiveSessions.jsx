@@ -126,11 +126,11 @@ export default function ActiveSessions({ token }) {
         if (diffInMinutes < 5) {
             color = 'green'; statusText = 'Highly Active';
         } else if (diffInMinutes < 15) {
-            color = 'yellow'; statusText = 'Moderately Active';
+            color = 'green'; statusText = 'Moderately Active';
         } else if (diffInMinutes < 30) {
-            color = 'orange'; statusText = 'Idle';
+            color = 'green'; statusText = 'Idle';
         } else {
-            color = 'red'; statusText = 'Inactive';
+            color = 'green'; statusText = 'Inactive';
         }
 
         return (
@@ -154,7 +154,7 @@ export default function ActiveSessions({ token }) {
             dataIndex: 'role',
             key: 'role',
             render: (role) => (
-                <Tag color={role === 'admin' ? 'blue' : 'purple'}>
+                <Tag color={role === 'admin' ? 'green' : 'green'}>
                     {role.toUpperCase()}
                 </Tag>
             ),
@@ -227,7 +227,7 @@ export default function ActiveSessions({ token }) {
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
                 className="dark-table"
-                rowKey="id"   // ✅ ensures stable row rendering
+                rowKey="id"  
             />
         </Card>
     );

@@ -41,15 +41,13 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(
-        isAdmin ? "/api/admin/events" : "/api/events",
-        authHeader(token)
-      );
+      // Use same endpoint for all users
+      const res = await api.get("/api/events", authHeader(token));
 
       const data = (res.data || []).map((e) => ({
         ...e,
         key: e._id,
-        date: e.startTime, // map backend startTime to frontend date
+        date: e.startTime,
       }));
       setEvents(data);
     } catch (error) {
@@ -57,7 +55,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
     } finally {
       setLoading(false);
     }
-  }, [token, isAdmin]);
+  }, [token]);
 
   useEffect(() => {
     fetchEvents();
@@ -72,7 +70,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
         description: values.description,
         location: values.location,
         type: values.type,
-        startTime: values.date?.toISOString(), // ✅ send startTime consistently
+        startTime: values.date?.toISOString(),
       };
 
       let res;
@@ -80,7 +78,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
       if (isEdit) {
         const id = form.getFieldValue("_id");
         res = await api.put(
-          `/api/admin/events/${id}`,
+          `/api/events/${id}`,
           payload,
           authHeader(token)
         );
@@ -96,7 +94,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
         message.success("Event updated successfully.");
       } else {
         res = await api.post(
-          "/api/admin/events",
+          "/api/events",
           payload,
           authHeader(token)
         );
@@ -122,7 +120,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
   // ---------- Delete ----------
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/api/admin/events/${id}`, authHeader(token));
+      await api.delete(`/api/events/${id}`, authHeader(token));
       setEvents((prev) => prev.filter((e) => e._id !== id));
       message.success("Event deleted.");
     } catch (error) {
@@ -154,12 +152,12 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
   return (
     <Card 
       title={
-        <div className=" flex items-center gap-2 !text-green-500 !font-xl !font-semibold font-[poppins]">
+        <div className="flex items-center gap-2 !text-green-500 !font-xl !font-semibold font-[poppins]">
           <CalendarPlus className="w-5 h-5" />
           {isAdmin ? "Event Manager" : "Upcoming Events"}
         </div>
       }
-      className="!bg-black/25 backdrop-blur-xl !rounded-2xl !border-0 "
+      className="!bg-black/25 backdrop-blur-xl !rounded-2xl !border-0"
       extra={
         isAdmin && (
           <Button
@@ -260,77 +258,77 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
           }}
           footer={null}
           className="custom-ant-modal"
+        >
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleCreateUpdate}
+            className="mt-4"
+            requiredMark={false}
           >
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleCreateUpdate}
-              className="mt-4"
-              requiredMark={false}
+            {isEdit && (
+              <Form.Item name="_id" hidden>
+                <Input />
+              </Form.Item>
+            )}
+
+            <Form.Item
+              name="title"
+              label={<span className="!font-semibold font-[poppins]">Title</span>}
+              rules={[{ required: true }]}
             >
-              {isEdit && (
-                <Form.Item name="_id" hidden>
-                  <Input />
-                </Form.Item>
-              )}
+              <Input className="dark-input" />
+            </Form.Item>
 
-              <Form.Item
-                name="title"
-                label={<span className="!font-semibold font-[poppins]">Title</span>}
-                rules={[{ required: true }]}
-              >
-                <Input className="dark-input" />
-                </Form.Item>
+            <Form.Item
+              name="description"
+              label={<span className="!font-semibold font-[poppins]">Description</span>}
+            >
+              <Input.TextArea rows={1} className="dark-input" />
+            </Form.Item>
 
-              <Form.Item
-                name="description"
-                label={<span className="!font-semibold font-[poppins]">Description</span>}
-              >
-                <Input.TextArea rows={1} className="dark-input" />
-              </Form.Item>
+            <Form.Item
+              name="date"
+              label={<span className="!font-semibold font-[poppins]">Date & Time</span>}
+              rules={[{ required: true }]}
+            >
+              <DatePicker
+                showTime
+                format="YYYY-MM-DD HH:mm"
+                className="dark-input w-full"
+              />
+            </Form.Item>
 
-              <Form.Item
-                name="date"
-                label={<span className="!font-semibold font-[poppins]">Date & Time</span>}
-                rules={[{ required: true }]}
-              >
-                <DatePicker
-                  showTime
-                  format="YYYY-MM-DD HH:mm"
-                  className="dark-input w-full"
-                />
-              </Form.Item>
+            <Form.Item
+              name="location"
+              label={<span className="!font-semibold font-[poppins]">Location</span>}
+              rules={[{ required: true }]}
+            >
+              <Input className="dark-input" />
+            </Form.Item>
 
-              <Form.Item
-                name="location"
-                label={<span className="!font-semibold font-[poppins]">Location</span>}
-                rules={[{ required: true }]}
-              >
-                <Input className="dark-input" />
-              </Form.Item>
+            <Form.Item
+              name="type"
+              label={<span className="!font-semibold font-[poppins]">Type</span>}
+              initialValue="regular"
+              rules={[{ required: true }]}
+            >
+              <Select>
+                <Option value="regular">Regular</Option>
+                <Option value="annual">Annual</Option>
+                <Option value="special">Special</Option>
+              </Select>
+            </Form.Item>
 
-              <Form.Item
-                name="type"
-                label={<span className="!font-semibold font-[poppins]">Type</span>}
-                initialValue="regular"
-                rules={[{ required: true }]}
-              >
-                <Select>
-                  <Option value="regular">Regular</Option>
-                  <Option value="annual">Annual</Option>
-                  <Option value="special">Special</Option>
-                </Select>
-              </Form.Item>
-
-              <Button
-                htmlType="submit"
-                type="primary"
-                loading={loading}
-                className="w-full !bg-green-500 !border-0 !outline-0 mt-4 !font-semibold !font-[poppins]"
-              >
-                {isEdit ? "Update Event" : "Create Event"}
-              </Button>
-            </Form>
+            <Button
+              htmlType="submit"
+              type="primary"
+              loading={loading}
+              className="w-full !bg-green-500 !border-0 !outline-0 mt-4 !font-semibold !font-[poppins]"
+            >
+              {isEdit ? "Update Event" : "Create Event"}
+            </Button>
+          </Form>
         </Modal>
       )}
     </Card>
