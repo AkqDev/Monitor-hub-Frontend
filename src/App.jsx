@@ -4,7 +4,7 @@ import AuthForm from './pages/AuthForm';
 import AdminDashboard from "./pages/AdminDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import { api, authHeader } from './utils/api';
-import { socket } from './utils/socket'; 
+import { socket } from './utils/socket';
 
 // --- Context Setup ---
 const AuthContext = createContext(null);
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     const verifyToken = async (authToken) => {
         if (!authToken) {
             setUser(null);
-            setToken(null); 
+            setToken(null);
             setIsLoading(false);
             if (socket.connected) socket.disconnect();
             return;
