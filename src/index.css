@@ -1,5 +1,4 @@
 /* Import statements must be at the top */
-@import "tailwindcss";
 
 body {
   overflow-x: hidden;
