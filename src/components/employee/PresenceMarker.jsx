@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, CheckCircle } from "lucide-react";
+import { MdSchedule, MdCheckCircle } from 'react-icons/md';
 import { Button, message } from "antd";
 import { api, authHeader } from "../../utils/api";
 
@@ -35,7 +35,7 @@ export default function PresenceMarker({ userId, token, onPresenceMarked }) {
       onClick={handleCheckIn}
       loading={loading}
       disabled={loading}
-      icon={<CheckCircle className="w-4 h-4" />}
+      icon={<MdCheckCircle className="w-4 h-4" />}
       className="!bg-green-500/30 !text-green-300 !border-green-500/50 hover:!bg-green-500/40 transition-all"
     >
       Check In

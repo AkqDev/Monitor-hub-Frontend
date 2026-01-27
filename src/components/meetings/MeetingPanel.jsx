@@ -19,24 +19,24 @@ import {
   notification
 } from 'antd';
 import { 
-  Video, 
-  Clock, 
-  Users, 
-  Shield, 
-  Calendar, 
-  Filter, 
-  Search,
-  Lock,
-  Unlock,
-  Mic,
-  MicOff,
-  Eye,
-  EyeOff,
-  Share2,
-  Copy,
-  Bell,
-  Star
-} from 'lucide-react';
+  MdVideoCall, 
+  MdSchedule, 
+  MdPeople, 
+  MdSecurity, 
+  MdCalendarToday, 
+  MdFilterList, 
+  MdSearch,
+  MdLock,
+  MdLockOpen,
+  MdMic,
+  MdMicOff,
+  MdVisibility,
+  MdVisibilityOff,
+  MdShare,
+  MdContentCopy,
+  MdNotifications,
+  MdStar
+} from 'react-icons/md';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 import VideoMeeting from './VideoMeeting';

@@ -3,8 +3,9 @@ import { Layout, Menu, Button, theme, Avatar, Dropdown, Card, Row, Col, message,
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../App'; 
 import { 
-    Home, ListTodo, Video, MessageSquare, Clock, Power, CheckCircle, XCircle, Megaphone, DollarSign, CalendarPlus, User, Monitor
-} from 'lucide-react';
+    MdHome, MdList, MdVideoCall, MdChat, MdSchedule, MdPowerSettingsNew, 
+    MdCheckCircle, MdCancel, MdCampaign, MdAttachMoney, MdEventAvailable, MdPerson, MdMonitor
+} from 'react-icons/md';
 
 import TaskList from '../components/employee/TaskList';
 import MeetingPanel from "../components/meetings/MeetingPanel";
@@ -19,14 +20,14 @@ import { api, authHeader } from '../utils/api';
 const { Header, Content, Sider } = Layout;
 
 const menuItems = [
-    { key: 'home', icon: <Home className='w-4 h-4' />, label: 'Home', path: '' },
-    { key: 'tasks', icon: <ListTodo className='w-4 h-4' />, label: 'My Tasks', path: 'tasks' },
-    { key: 'meetings', icon: <Video className='w-4 h-4' />, label: 'Meetings', path: 'meetings' },
-    { key: 'chat', icon: <MessageSquare className='w-4 h-4' />, label: 'Global Chat', path: 'chat' },
-    { key: 'announcements', icon: <Megaphone className='w-4 h-4' />, label: 'Announcements', path: 'announcements' },
-    { key: 'events', icon: <CalendarPlus className='w-4 h-4' />, label: 'Events', path: 'events' },
-    { key: 'fines', icon: <DollarSign className='w-4 h-4' />, label: 'My Fines', path: 'fines' },
-    { key: 'screen-monitoring', icon: <Monitor className='w-4 h-4' />, label: 'Screen Monitoring', path: 'screen-monitoring' },
+    { key: 'home', icon: <MdHome className='w-4 h-4' />, label: 'Home', path: '' },
+    { key: 'tasks', icon: <MdList className='w-4 h-4' />, label: 'My Tasks', path: 'tasks' },
+    { key: 'meetings', icon: <MdVideoCall className='w-4 h-4' />, label: 'Meetings', path: 'meetings' },
+    { key: 'chat', icon: <MdChat className='w-4 h-4' />, label: 'Global Chat', path: 'chat' },
+    { key: 'announcements', icon: <MdCampaign className='w-4 h-4' />, label: 'Announcements', path: 'announcements' },
+    { key: 'events', icon: <MdEventAvailable className='w-4 h-4' />, label: 'Events', path: 'events' },
+    { key: 'fines', icon: <MdAttachMoney className='w-4 h-4' />, label: 'My Fines', path: 'fines' },
+    { key: 'screen-monitoring', icon: <MdMonitor className='w-4 h-4' />, label: 'Screen Monitoring', path: 'screen-monitoring' },
 ];
 
 export default function EmployeeDashboard() {

@@ -20,7 +20,6 @@ import {
 } from "react-icons/md";
 import moment from "moment";
 import { api, authHeader } from "../../utils/api";
-import "@fontsource/poppins"; // match font-[poppins]
 
 const { Option } = Select;
 

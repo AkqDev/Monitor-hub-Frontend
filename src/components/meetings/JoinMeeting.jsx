@@ -15,15 +15,15 @@ import {
   Typography
 } from 'antd';
 import { 
-  Video, 
-  Lock, 
-  Users, 
-  Calendar, 
-  Clock, 
-  ArrowLeft,
-  Shield,
-  CheckCircle
-} from 'lucide-react';
+  MdVideoCall, 
+  MdLock, 
+  MdPeople, 
+  MdCalendarToday, 
+  MdSchedule, 
+  MdArrowBack,
+  MdSecurity,
+  MdCheckCircle
+} from 'react-icons/md';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 import VideoMeeting from './VideoMeeting';

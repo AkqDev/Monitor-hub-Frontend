@@ -12,7 +12,7 @@ import {
   Popconfirm,
   message
 } from 'antd';
-import { DollarSign, Plus, CheckCircle, Trash2, Edit2 } from 'lucide-react';
+import { MdAttachMoney, MdAdd, MdCheckCircle, MdDelete, MdEdit } from 'react-icons/md';
 import { api, authHeader } from '../../utils/api';
 
 const { Option } = Select;

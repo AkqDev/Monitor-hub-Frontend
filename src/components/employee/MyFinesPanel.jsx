@@ -1,7 +1,7 @@
 // File: MyFinesPanel.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, List, Button, Tag, message, Spin, Popconfirm } from 'antd';
-import { DollarSign, CheckCircle } from 'lucide-react';
+import { MdAttachMoney, MdCheckCircle } from 'react-icons/md';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 
@@ -37,7 +37,7 @@ export default function MyFinesPanel({ token }) {
 
     return (
         <Card
-            title={<div className="flex items-center gap-2 text-green-400 font-semibold"><DollarSign className='w-5 h-5 text-green-400' /> My Fines</div>}
+            title={<div className="flex items-center gap-2 text-green-400 font-semibold"><MdAttachMoney className='w-5 h-5 text-green-400' /> My Fines</div>}
             className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 h-full"
         >
             <Spin spinning={loading}>
@@ -56,7 +56,7 @@ export default function MyFinesPanel({ token }) {
                                         cancelText="No"
                                         key="markPaid"
                                     >
-                                        <Button type="primary" size="small" icon={<CheckCircle className='w-4 h-4' />}>
+                                        <Button type="primary" size="small" icon={<MdCheckCircle className='w-4 h-4' />}>
                                             Mark Paid
                                         </Button>
                                     </Popconfirm>

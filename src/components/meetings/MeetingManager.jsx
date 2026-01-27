@@ -20,21 +20,21 @@ import {
   Col
 } from 'antd';
 import { 
-  Video, 
-  Plus, 
-  Trash, 
-  Edit, 
-  Settings, 
-  Users, 
-  Clock, 
-  Lock, 
-  Unlock,
-  Copy,
-  Share2,
-  Calendar,
-  Eye,
-  LogIn
-} from 'lucide-react';
+  MdVideoCall, 
+  MdAdd, 
+  MdDelete, 
+  MdEdit, 
+  MdSettings, 
+  MdPeople, 
+  MdSchedule, 
+  MdLock, 
+  MdLockOpen,
+  MdContentCopy,
+  MdShare,
+  MdCalendarToday,
+  MdVisibility,
+  MdLogin
+} from 'react-icons/md';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 import { v4 as uuidv4 } from 'uuid';

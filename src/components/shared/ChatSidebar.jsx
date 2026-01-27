@@ -5,12 +5,12 @@ import {
   Form, Select, Tag, Divider, message
 } from "antd";
 import { 
-  Search, Plus, Users, Globe, User, 
-  Shield, MoreVertical, MessageSquare,
-  Video, Phone, Edit2, Trash2, Pin,
-  Check, CheckCheck, Clock, Hash,
-  Volume2, VolumeX
-} from "lucide-react";
+  MdSearch, MdAdd, MdPeople, MdPublic, MdPerson, 
+  MdSecurity, MdMoreVert, MdChat,
+  MdVideoCall, MdPhone, MdEdit, MdDelete, MdPushPin,
+  MdCheck, MdDoneAll, MdSchedule, MdTag,
+  MdVolumeUp, MdVolumeOff
+} from "react-icons/md";
 import { api, authHeader } from "../../utils/api";
 import moment from "moment";
 import "../styles/ChatSidebar.css";

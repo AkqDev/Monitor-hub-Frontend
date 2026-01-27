@@ -1,24 +1,24 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { 
-  Video, 
-  Mic, 
-  MicOff, 
-  VideoOff, 
-  PhoneOff, 
-  User, 
-  Monitor, 
-  MessageSquare, 
-  Settings, 
-  Hand, 
-  Users as UsersIcon,
-  Share2,
-  Copy,
-  MoreVertical,
-  Maximize2,
-  Minimize2,
-  Shield,
-  Volume2
-} from 'lucide-react';
+  MdVideoCall, 
+  MdMic, 
+  MdMicOff, 
+  MdVideocamOff, 
+  MdCallEnd, 
+  MdPerson, 
+  MdMonitor, 
+  MdChat, 
+  MdSettings, 
+  MdPanTool, 
+  MdPeople,
+  MdShare,
+  MdContentCopy,
+  MdMoreVert,
+  MdFullscreen,
+  MdFullscreenExit,
+  MdSecurity,
+  MdVolumeUp
+} from 'react-icons/md';
 import { 
   Button, 
   Tooltip, 
