@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { socket } from '../../utils/socket';
-import { Monitor, Camera, Globe, User, Clock, Eye, Users, AlertCircle, Activity, RefreshCw } from 'lucide-react';
+import { 
+  MdMonitor, 
+  MdVideocam, 
+  MdPublic, 
+  MdPerson, 
+  MdAccessTime, 
+  MdVisibility, 
+  MdGroup, 
+  MdWarning, 
+  MdShowChart, 
+  MdRefresh 
+} from 'react-icons/md';
 
 export default function ScreenMonitor({ adminUser }) {
     const [liveStreams, setLiveStreams] = useState({});
@@ -15,8 +26,11 @@ export default function ScreenMonitor({ adminUser }) {
     const autoRefreshRef = useRef(null);
 
     useEffect(() => {
+        console.log('🔧 ScreenMonitor: Setting up socket listeners for admin user:', adminUser?.name);
+        
         // Register admin user
         if (adminUser) {
+            console.log('📡 Registering admin user with socket');
             socket.emit('registerUser', {
                 userId: adminUser?.id || adminUser?._id,
                 userRole: 'admin',
@@ -26,6 +40,7 @@ export default function ScreenMonitor({ adminUser }) {
         }
 
         const handleStreamData = (data) => {
+            console.log('📺 Received stream data from:', data.user?.name, 'userId:', data.userId);
             setLiveStreams(prev => ({
                 ...prev,
                 [data.userId]: {
@@ -42,6 +57,7 @@ export default function ScreenMonitor({ adminUser }) {
         };
 
         const handleEndStream = (userId) => {
+            console.log('🔴 Stream ended for user:', userId);
             setLiveStreams(prev => {
                 const newState = { ...prev };
                 delete newState[userId];
@@ -51,6 +67,7 @@ export default function ScreenMonitor({ adminUser }) {
         };
 
         const handleUserConnected = (user) => {
+            console.log('🟢 User connected:', user);
             setConnectedUsers(prev => {
                 const exists = prev.find(u => u.userId === user.userId);
                 if (exists) return prev;
@@ -59,10 +76,12 @@ export default function ScreenMonitor({ adminUser }) {
         };
 
         const handleUserDisconnected = (userId) => {
+            console.log('🔴 User disconnected:', userId);
             setConnectedUsers(prev => prev.filter(u => u.userId !== userId));
         };
 
         const handleInitialStreams = (streams) => {
+            console.log('📋 Received initial streams:', streams);
             const streamsObj = {};
             streams.forEach(stream => {
                 streamsObj[stream.userId] = stream;
@@ -155,11 +174,11 @@ export default function ScreenMonitor({ adminUser }) {
                 {/* Header */}
                 <div className="mb-6">
                     <h3 className="text-white font-semibold text-lg mb-2 flex items-center gap-2">
-                        <Globe className='w-5 h-5 text-blue-400' /> Active Monitors
+                        <MdPublic className='w-5 h-5 text-blue-400' /> Active Monitors
                     </h3>
                     <div className="text-sm text-gray-300 bg-black/30 p-3 rounded-lg">
                         <p className="flex items-center gap-2 mb-1">
-                            <Users className="w-4 h-4" />
+                            <MdGroup className="w-4 h-4" />
                             <span className="font-medium">{activeUsers.length} employees sharing</span>
                         </p>
                         <p className="text-xs text-gray-400">Click any user to view their activity</p>
@@ -170,7 +189,7 @@ export default function ScreenMonitor({ adminUser }) {
                 <div className="space-y-2">
                     {activeUsers.length === 0 ? (
                         <div className="text-center p-6 text-gray-400">
-                            <Eye className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                            <MdVisibility className="w-12 h-12 mx-auto mb-3 opacity-30" />
                             <p>No active monitoring sessions</p>
                             <p className="text-sm mt-1">Waiting for employees to start sharing...</p>
                         </div>
@@ -218,7 +237,7 @@ export default function ScreenMonitor({ adminUser }) {
                 {/* Statistics */}
                 <div className="mt-6 p-4 bg-black/20 rounded-xl">
                     <h4 className="text-white font-medium text-sm mb-3 flex items-center gap-2">
-                        <Activity className="w-4 h-4" /> Statistics
+                        <MdShowChart className="w-4 h-4" /> Statistics
                     </h4>
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
@@ -243,7 +262,7 @@ export default function ScreenMonitor({ adminUser }) {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div>
                         <h3 className="text-white text-xl font-semibold flex items-center gap-2">
-                            <Eye className='w-6 h-6 text-amber-400' /> Live Monitor View
+                            <MdVisibility className='w-6 h-6 text-amber-400' /> Live Monitor View
                         </h3>
                         <p className="text-gray-400 text-sm">
                             {selectedStream ? `Viewing: ${selectedStream.user?.name}` : 'Select a user to begin monitoring'}
@@ -263,12 +282,28 @@ export default function ScreenMonitor({ adminUser }) {
                             <div className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
                             Auto-refresh
                         </button>
+                        
+                        {/* Debug Button */}
+                        <button
+                            onClick={() => {
+                                console.log('🔍 Debug Info:');
+                                console.log('- Live Streams:', Object.keys(liveStreams).length);
+                                console.log('- Connected Users:', connectedUsers.length);
+                                console.log('- Selected User:', selectedUserId);
+                                console.log('- Admin User:', adminUser?.name);
+                                console.log('- Socket Connected:', socket.connected);
+                                message.info(`Debug: ${Object.keys(liveStreams).length} streams, ${connectedUsers.length} users`);
+                            }}
+                            className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-lg transition-colors hover:bg-blue-500/30"
+                        >
+                            🔍 Debug
+                        </button>
                     </div>
                 </div>
 
                 {!selectedStream ? (
                     <div className="flex flex-col items-center justify-center h-[500px] text-center">
-                        <Monitor className='w-24 h-24 mb-6 text-gray-400 opacity-30' />
+                        <MdMonitor className='w-24 h-24 mb-6 text-gray-400 opacity-30' />
                         <p className='text-xl text-white mb-2'>No Stream Selected</p>
                         <p className='text-gray-400 max-w-md'>
                             Select an employee from the sidebar to view their screen and webcam feed in real-time.
@@ -281,14 +316,14 @@ export default function ScreenMonitor({ adminUser }) {
                             <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
                                 <div className='flex items-center gap-4'>
                                     <div className="bg-blue-500/20 p-3 rounded-lg">
-                                        <User className='w-6 h-6 text-white' />
+                                        <MdPerson className='w-6 h-6 text-white' />
                                     </div>
                                     <div>
                                         <p className="text-xl text-white font-semibold">{selectedStream.user?.name}</p>
                                         <div className="flex items-center gap-4 mt-1">
                                             <p className="text-sm text-gray-300">{selectedStream.user?.email}</p>
                                             <p className="text-sm text-green-400 flex items-center gap-1">
-                                                <Clock className='w-3 h-3' /> Updated: {new Date(selectedStream.timestamp).toLocaleTimeString()}
+                                                <MdAccessTime className='w-3 h-3' /> Updated: {new Date(selectedStream.timestamp).toLocaleTimeString()}
                                             </p>
                                         </div>
                                     </div>
@@ -316,7 +351,7 @@ export default function ScreenMonitor({ adminUser }) {
                                 <div className="bg-black rounded-xl border-2 border-white/10 overflow-hidden">
                                     <div className="bg-black/80 p-3 border-b border-white/10 flex items-center justify-between">
                                         <h4 className='text-white font-medium flex items-center gap-2'>
-                                            <Monitor className='w-5 h-5' /> Live Screen Feed
+                                            <MdMonitor className='w-5 h-5' /> Live Screen Feed
                                         </h4>
                                         <span className="text-xs text-gray-400">
                                             Resolution: 1280x720 | FPS: ~15
@@ -338,7 +373,7 @@ export default function ScreenMonitor({ adminUser }) {
                                 <div className="bg-black rounded-xl border-2 border-white/10 overflow-hidden">
                                     <div className="bg-black/80 p-3 border-b border-white/10">
                                         <h4 className='text-white font-medium flex items-center gap-2'>
-                                            <Camera className='w-5 h-5' /> Webcam Feed
+                                            <MdVideocam className='w-5 h-5' /> Webcam Feed
                                         </h4>
                                     </div>
                                     <div className="p-2">
@@ -350,7 +385,7 @@ export default function ScreenMonitor({ adminUser }) {
                                             />
                                         ) : (
                                             <div className='flex flex-col items-center justify-center bg-gray-900 rounded-lg aspect-video p-4'>
-                                                <Camera className='w-12 h-12 text-gray-600 mb-3' />
+                                                <MdVideocam className='w-12 h-12 text-gray-600 mb-3' />
                                                 <p className="text-gray-400 text-sm text-center">Webcam not available</p>
                                             </div>
                                         )}
@@ -360,7 +395,7 @@ export default function ScreenMonitor({ adminUser }) {
                                 {/* Stream Info */}
                                 <div className="bg-blue-500/10 rounded-xl border border-blue-500/30 p-4">
                                     <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                                        <AlertCircle className="w-5 h-5" /> Stream Information
+                                        <MdWarning className="w-5 h-5" /> Stream Information
                                     </h4>
                                     <div className="space-y-3">
                                         <div>

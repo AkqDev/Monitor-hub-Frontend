@@ -46,12 +46,8 @@ export default function EmployeeDashboard() {
 
     // Get user ID - standardized approach
     const getUserId = () => {
-        console.log('User object:', user);
-        
         // Try different possible ID fields
         const userId = user?.id || user?._id || user?.userId;
-        console.log('Extracted userId:', userId);
-        
         return userId;
     };
 
@@ -59,22 +55,16 @@ export default function EmployeeDashboard() {
     const fetchPresenceStatus = async () => {
         const userId = getUserId();
         if (!userId || !token) {
-            console.log('Cannot fetch: userId =', userId, 'token =', !!token);
             return;
         }
 
         try {
-            console.log('Fetching presence status for userId:', userId);
             const res = await api.get(`/api/presence/status/${userId}`, authHeader(token));
-            console.log('Full API Response:', res.data);
             
             // Check if we have history with active presence
             const activePresence = res.data?.history?.find(p => p.active === true);
             const isActive = res.data?.active || activePresence?.active || false;
             const startTime = res.data?.startTime || activePresence?.startTime;
-            
-            console.log('Setting isCheckedIn to:', isActive);
-            console.log('Setting checkInTime to:', startTime);
             
             setIsCheckedIn(isActive);
             setCheckInTime(startTime ? new Date(startTime) : null);
@@ -86,18 +76,15 @@ export default function EmployeeDashboard() {
     };
     
     useEffect(() => {
-        console.log('Auth hook values:', { user, token: !!token, userId: getUserId() });
         if (user && token) {
             fetchPresenceStatus();
         }
     }, [user, token]);
 
     const handleCheckIn = async () => {
-        console.log('Check In button clicked, current isCheckedIn:', isCheckedIn);
         try {
             setCheckInLoading(true);
             const response = await api.post('/api/presence/checkin', {}, authHeader(token));
-            console.log('Check-in successful:', response.data);
             
             // Update state immediately
             setIsCheckedIn(true);
@@ -113,7 +100,6 @@ export default function EmployeeDashboard() {
             
             // If "already checked in", update frontend state
             if (error.response?.data?.message === "User already checked in.") {
-                console.log('User is already checked in, updating frontend state');
                 setIsCheckedIn(true);
                 // Try to fetch current check-in time
                 await fetchPresenceStatus();
@@ -127,11 +113,9 @@ export default function EmployeeDashboard() {
     };
 
     const handleCheckOut = async () => {
-        console.log('Check Out button clicked, current isCheckedIn:', isCheckedIn);
         try {
             setCheckOutLoading(true);
             const response = await api.post('/api/presence/checkout', {}, authHeader(token)); 
-            console.log('Check-out successful:', response.data);
             
             // Update state immediately
             setIsCheckedIn(false);
@@ -147,7 +131,6 @@ export default function EmployeeDashboard() {
             
             // If "not checked in", update frontend state
             if (error.response?.data?.message === "User is not checked in.") {
-                console.log('User is not checked in, updating frontend state');
                 setIsCheckedIn(false);
                 setCheckInTime(null);
                 message.info("You are not checked in.");
@@ -309,7 +292,7 @@ export default function EmployeeDashboard() {
                         <Route path="announcements" element={<AnnouncementManagerPanel token={token} isAdmin={false} />} />
                         <Route path="events" element={<EventManagerPanel token={token} isAdmin={false} />} />
                         <Route path="fines" element={<MyFinesPanel token={token} />} />
-                        <Route path="screen-monitoring" element={<ScreenMonitoring socketToken={token} user={user} />} />
+                        <Route path="screen-monitoring" element={<ScreenMonitoring user={user} />} />
                           {/* ADD THESE MEETING JOIN ROUTES */}
   <Route path="meetings/join/:meetingId" element={<JoinMeeting />} />
   <Route path="meeting/:meetingId" element={<JoinMeeting />} />
@@ -323,8 +306,6 @@ export default function EmployeeDashboard() {
 
 // --- Employee Home Component ---
 const EmployeeHome = ({ user, checkInTime, isCheckedIn }) => {
-    console.log('EmployeeHome render - User:', user?.name, 'isCheckedIn:', isCheckedIn, 'checkInTime:', checkInTime);
-    
     return (
         <Row gutter={[16, 16]}>
             <Col span={24}>

@@ -248,7 +248,7 @@ export default function AdminDashboard() {
               />} 
             />
             <Route path="sessions" element={<ActiveSessions token={token} />} />
-            <Route path="monitoring" element={<ScreenMonitor token={token} />} />
+            <Route path="monitoring" element={<ScreenMonitor adminUser={user} token={token} />} />
             <Route path="tasks" element={<TaskManager token={token} />} />
             <Route path="meetings" element={<MeetingManager token={token} />} />
             <Route path="events" element={<EventManagerPanel token={token} isAdmin />} />
@@ -363,7 +363,7 @@ const OverviewDashboard = ({ user, stats, loading, token, onRefresh }) => {
               <Col xs={24} sm={12} md={8} lg={6} key={index}>
                 <Card 
                   className="!bg-gray-800 border-gray-700 hover:border-green-500 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  bodyStyle={{ padding: '20px' }}
+                  styles={{ body: { padding: '20px' } }}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="p-3 rounded-lg" style={{ backgroundColor: `${stat.color}20` }}>

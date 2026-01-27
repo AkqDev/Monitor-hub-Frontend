@@ -53,8 +53,10 @@ export default function ActivityLogPanel({ token, isAdmin = false }) {
             title={<div className="flex items-center gap-2 text-gray-400 font-semibold"><FaHistory className='w-5 h-5 text-green-400' /> {isAdmin ? 'System Activity Feed' : 'My Recent Activity'}</div>}
             className="!bg-black/25 backdrop-blur-xl rounded-2xl border border-white/20 activity-card"
             // FIX: Added Ant Design specific styles to ensure dark theme compatibility
-            headStyle={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff' }}
-            bodyStyle={{ padding: 0 }}
+            styles={{ 
+              header: { borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff' },
+              body: { padding: 0 } 
+            }}
         >
             <Spin spinning={loading}>
                 <List

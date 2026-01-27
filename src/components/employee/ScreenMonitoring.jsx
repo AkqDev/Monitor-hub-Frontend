@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { socket } from "../../utils/socket";
-import { Monitor, Camera, Play, StopCircle, Eye, Users } from "lucide-react";
+import { 
+  MdMonitor, 
+  MdVideocam, 
+  MdPlayArrow, 
+  MdStop, 
+  MdVisibility, 
+  MdGroup 
+} from 'react-icons/md';
 import { message } from "antd";
 
 const STREAM_INTERVAL = 3000; // Increased frequency for smoother updates
@@ -23,8 +30,11 @@ export default function ScreenMonitoring({ user }) {
     const lastUpdateRef = useRef(Date.now());
 
     useEffect(() => {
+        console.log('🔧 ScreenMonitoring: Setting up for user:', user?.name);
+        
         // Register user with socket
         if (user) {
+            console.log('📡 Registering employee user with socket');
             socket.emit('registerUser', {
                 userId: user?.id || user?._id,
                 userRole: 'employee',
@@ -114,6 +124,7 @@ export default function ScreenMonitoring({ user }) {
                     if (webcamData) setLocalWebcamPreview(webcamData);
                     
                     // Send to server
+                    console.log('📡 Sending stream data to server for user:', user?.name);
                     socket.emit("streamData", {
                         userId: user?.id || user?._id,
                         user: {
@@ -196,7 +207,7 @@ export default function ScreenMonitoring({ user }) {
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-white font-semibold text-xl flex items-center gap-2">
-                    <Monitor className="w-6 h-6 text-blue-400" /> Work Session Monitoring
+                    <MdMonitor className="w-6 h-6 text-blue-400" /> Work Session Monitoring
                 </h3>
                 {isStreaming && (
                     <div className="flex items-center gap-4">
@@ -218,7 +229,7 @@ export default function ScreenMonitoring({ user }) {
                     <div className="bg-black/50 rounded-xl border-2 border-white/10 overflow-hidden">
                         <div className="bg-black/80 p-3 border-b border-white/10">
                             <h4 className="text-white font-medium flex items-center gap-2">
-                                <Eye className="w-4 h-4" /> Your Screen Preview
+                                <MdVisibility className="w-4 h-4" /> Your Screen Preview
                             </h4>
                         </div>
                         <div className="min-h-[400px] flex items-center justify-center p-4">
@@ -230,7 +241,7 @@ export default function ScreenMonitoring({ user }) {
                                 />
                             ) : (
                                 <div className="text-center text-gray-400">
-                                    <Monitor className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                                    <MdMonitor className="w-16 h-16 mx-auto mb-4 opacity-30" />
                                     <p className="text-lg">Screen preview will appear here</p>
                                     <p className="text-sm mt-2">Click "Start Sharing" to begin</p>
                                 </div>
@@ -245,7 +256,7 @@ export default function ScreenMonitoring({ user }) {
                     <div className="bg-black/50 rounded-xl border-2 border-white/10 overflow-hidden">
                         <div className="bg-black/80 p-3 border-b border-white/10">
                             <h4 className="text-white font-medium flex items-center gap-2">
-                                <Camera className="w-4 h-4" /> Webcam Preview
+                                <MdVideocam className="w-4 h-4" /> Webcam Preview
                             </h4>
                         </div>
                         <div className="min-h-[200px] flex items-center justify-center p-4">
@@ -257,7 +268,7 @@ export default function ScreenMonitoring({ user }) {
                                 />
                             ) : (
                                 <div className="text-center text-gray-400">
-                                    <Camera className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                                    <MdVideocam className="w-12 h-12 mx-auto mb-3 opacity-30" />
                                     <p className="text-sm">Webcam feed will appear here</p>
                                 </div>
                             )}
@@ -267,7 +278,7 @@ export default function ScreenMonitoring({ user }) {
                     {/* Stats Panel */}
                     <div className="bg-blue-500/10 rounded-xl border border-blue-500/30 p-4">
                         <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                            <Users className="w-4 h-4" /> Sharing Status
+                            <MdGroup className="w-4 h-4" /> Sharing Status
                         </h4>
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
@@ -296,7 +307,7 @@ export default function ScreenMonitoring({ user }) {
                         onClick={startMonitoring}
                         className="flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 rounded-xl transition-all duration-300 font-semibold text-lg group"
                     >
-                        <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        <MdPlayArrow className="w-5 h-5 group-hover:scale-110 transition-transform" />
                         Start Screen Sharing
                     </button>
                 ) : (
@@ -304,7 +315,7 @@ export default function ScreenMonitoring({ user }) {
                         onClick={stopMonitoring}
                         className="flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-600 hover:to-red-700 text-white px-8 py-4 rounded-xl transition-all duration-300 font-semibold text-lg group"
                     >
-                        <StopCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        <MdStop className="w-5 h-5 group-hover:scale-110 transition-transform" />
                         Stop Sharing
                     </button>
                 )}
@@ -324,6 +335,28 @@ export default function ScreenMonitoring({ user }) {
                         Refresh Preview
                     </button>
                 )}
+
+                {/* Test Socket Connection Button */}
+                <button
+                    onClick={() => {
+                        console.log('🧪 Testing socket connection...');
+                        socket.emit("streamData", {
+                            userId: user?.id || user?._id,
+                            user: {
+                                name: user?.name,
+                                email: user?.email,
+                                role: user?.role
+                            },
+                            screen: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=",
+                            webcam: null,
+                            timestamp: new Date().toISOString(),
+                        });
+                        message.info('Test stream data sent to admins');
+                    }}
+                    className="px-6 py-4 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/50 rounded-xl transition-colors"
+                >
+                    🧪 Test Connection
+                </button>
             </div>
 
             {/* Hidden video elements for capture */}

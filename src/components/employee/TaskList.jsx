@@ -70,7 +70,7 @@ export default function TaskList({ token, compact = false }) {
                 </div>
             }
             className="!bg-black/40 backdrop-blur-xl rounded-3xl !border-white/10 shadow-2xl overflow-hidden font-[Poppins]"
-            bodyStyle={{ padding: '24px' }}
+            styles={{ body: { padding: '24px' } }}
             extra={
                 <Button
                     onClick={fetchTasks}
@@ -137,9 +137,9 @@ export default function TaskList({ token, compact = false }) {
                                     <div className="w-40 flex justify-center !text-white">
                                         <Select
                                             value={task.status}
-                                            bordered={false}
+                                            variant="borderless"
                                             className="w-full rounded !font-semibold text-sm border border-white/10 !bg-black !text-gray-200"
-                                            dropdownClassName="!bg-black !border !border-white/10 shadow-2xl !text-white"
+                                            classNames={{ popup: { root: "!bg-black !border !border-white/10 shadow-2xl !text-white" } }}
                                             onChange={(val) => handleStatusChange(task._id, val)}
                                         >
                                             <Option value="in-progress">
