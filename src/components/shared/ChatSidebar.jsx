@@ -113,10 +113,10 @@ export default function ChatSidebar({
   };
 
   const getStatusIcon = (user) => {
-    if (user._id === "global") return <Globe className="text-blue-400" />;
-    if (user.role === "admin") return <Shield className="text-purple-400" />;
-    if (user.isGroup) return <Users className="text-green-400" />;
-    return <User className={user.online ? "text-green-400" : "text-gray-400"} />;
+    if (user._id === "global") return <MdPublic className="text-blue-400" />;
+    if (user.role === "admin") return <MdSecurity className="text-purple-400" />;
+    if (user.isGroup) return <MdPeople className="text-green-400" />;
+    return <MdPerson className={user.online ? "text-green-400" : "text-gray-400"} />;
   };
 
   const getStatusText = (user) => {
@@ -194,7 +194,7 @@ export default function ChatSidebar({
     <div className="chat-sidebar">
       <div className="sidebar-header">
         <Title level={3} className="sidebar-title">
-          <MessageSquare className="mr-2" />
+          <MdChat className="mr-2" />
           Messages
           <Badge 
             count={Object.values(unreadCounts).reduce((a, b) => a + b, 0)}
@@ -263,7 +263,7 @@ export default function ChatSidebar({
               <div className="chat-header">
                 <span className="chat-name">
                   {user._id === userId ? `${user.name} (You)` : user.name}
-                  {user.isGroup && <Hash size={12} className="ml-1" />}
+                  {user.isGroup && <MdTag size={12} className="ml-1" />}
                 </span>
                 <span className="chat-time">
                   {user.lastMessage && moment(user.lastMessage.time).format('HH:mm')}

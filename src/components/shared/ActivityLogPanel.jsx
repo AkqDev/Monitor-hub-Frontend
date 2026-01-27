@@ -89,7 +89,7 @@ export default function ActivityLogPanel({ token, isAdmin = false }) {
                                             )}
                                             {!isAdmin && userDetails && (
                                                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                     <User className='w-3 h-3 text-gray-500' />
+                                                     <MdPerson className='w-3 h-3 text-gray-500' />
                                                     <span>User ID: {log.userId._id || log.userId}</span>
                                                 </div>
                                             )}

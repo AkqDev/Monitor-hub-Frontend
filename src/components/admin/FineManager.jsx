@@ -163,7 +163,7 @@ export default function FineManager({ token }) {
         }
         extra={
           <Button
-            icon={<Plus size={16} />}
+            icon={<MdAdd size={16} />}
             onClick={() => { setOpen(true); setEditFine(null); form.resetFields(); }}
             className="rounded-full font-poppins"
           >
