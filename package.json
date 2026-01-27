@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --host 0.0.0.0 --port $PORT",
     "start": "node server.js"
   },
   "dependencies": {
@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
-    "@tailwindcss/vite": "^4.0.0-alpha.20",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
