@@ -60,7 +60,14 @@ export default function RoleBasedAuth() {
   const [showSecretKeyForm, setShowSecretKeyForm] = useState(false);
   const [remember, setRemember] = useState(true);
   const navigate = useNavigate();
-  const { user: authUser, login, isLoading } = useAuth();
+  const authContext = useAuth();
+  
+  // Add null check for auth context
+  if (!authContext) {
+    return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading...</div>;
+  }
+  
+  const { user: authUser, login, isLoading } = authContext;
 
   // Ant Design Form instances for easy data retrieval
   const [loginForm] = Form.useForm();

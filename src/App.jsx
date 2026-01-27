@@ -89,7 +89,14 @@ export const AuthProvider = ({ children }) => {
 
 // --- Protected Route Component ---
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { user, isLoading } = useAuth();
+    const authContext = useAuth();
+    
+    // Add null check for auth context
+    if (!authContext) {
+        return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading...</div>;
+    }
+    
+    const { user, isLoading } = authContext;
 
     if (isLoading) {
         return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading application...</div>;
@@ -105,7 +112,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 // --- Home Redirect ---
 const HomeRedirect = () => {
-    const { user, isLoading } = useAuth();
+    const authContext = useAuth();
+    
+    // Add null check for auth context
+    if (!authContext) {
+        return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading...</div>;
+    }
+    
+    const { user, isLoading } = authContext;
     if (isLoading) return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading...</div>;
     if (user) return <Navigate to={user.role === 'admin' ? '/admin' : '/employee'} replace />;
     return <Navigate to="/auth" replace />;

@@ -43,7 +43,14 @@ const menuItems = [
 ];
 
 export default function AdminDashboard() {
-  const { user, token, logout } = useAuth();
+  const authContext = useAuth();
+  
+  // Add null check for auth context
+  if (!authContext) {
+    return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading...</div>;
+  }
+  
+  const { user, token, logout } = authContext;
   const navigate = useNavigate();
   const location = useLocation();
   const { token: antdToken } = theme.useToken();

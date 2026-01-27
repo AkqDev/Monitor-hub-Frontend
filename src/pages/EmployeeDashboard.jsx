@@ -31,7 +31,14 @@ const menuItems = [
 ];
 
 export default function EmployeeDashboard() {
-    const { user, token, logout } = useAuth(); 
+    const authContext = useAuth();
+    
+    // Add null check for auth context
+    if (!authContext) {
+        return <div className="text-white text-center p-8 bg-gray-900 min-h-screen">Loading...</div>;
+    }
+    
+    const { user, token, logout } = authContext; 
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -255,7 +262,7 @@ export default function EmployeeDashboard() {
                             ) : (
                                 <Button
                                     onClick={handleCheckIn}
-                                    icon={<CheckCircle className="w-4 h-4" />}
+                                    icon={<MdCheckCircle className="w-4 h-4" />}
                                     className="!bg-green-500 !text-white !rounded-full !px-4 !py-2 !border-0 !font-semibold hover:!bg-green-600 active:!bg-green-700"
                                     loading={checkInLoading}
                                     disabled={checkInLoading}
@@ -268,7 +275,7 @@ export default function EmployeeDashboard() {
 
                         <Dropdown menu={userDropdownMenu} trigger={['click']}>
                             <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-all mr-10">
-                                <Avatar className="!bg-green-500 shadow-md" icon={<User size={16} />} />
+                                <Avatar className="!bg-green-500 shadow-md" icon={<MdPerson size={16} />} />
                                 <span className="!text-gray-100 !font-semibold hidden sm:block">{user?.name}</span>
                             </div>
                         </Dropdown>
@@ -320,7 +327,7 @@ const EmployeeHome = ({ user, checkInTime, isCheckedIn }) => {
 
             <Col span={24}>
                 <Card 
-                    title={<div className="flex items-center gap-2 text-green-500 font-[poppins] !font-bold"><Clock className='w-5 h-5' /> Session Status</div>}
+                    title={<div className="flex items-center gap-2 text-green-500 font-[poppins] !font-bold"><MdSchedule className='w-5 h-5' /> Session Status</div>}
                     className="!bg-black/25 backdrop-blur-xl rounded-2xl !border-0"
                 >
                     <p className="text-lg font-[poppins] !text-green-500">

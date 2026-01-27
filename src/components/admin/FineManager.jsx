@@ -127,7 +127,7 @@ export default function FineManager({ token }) {
         <div className="flex gap-2">
           {!record.isPaid && (
             <Popconfirm title="Mark this fine as paid?" onConfirm={() => markPaid(record._id)}>
-              <Button size="small" type="primary" className="rounded-full font-poppins" icon={<CheckCircle className="w-4 h-4" />}>
+              <Button size="small" type="primary" className="rounded-full font-poppins" icon={<MdCheckCircle className="w-4 h-4" />}>
                 Mark Paid
               </Button>
             </Popconfirm>
@@ -136,13 +136,13 @@ export default function FineManager({ token }) {
             size="small"
             type="default"
             className="rounded-full font-poppins"
-            icon={<Edit2 className="w-4 h-4" />}
+            icon={<MdEdit className="w-4 h-4" />}
             onClick={() => openEditModal(record)}
           >
             Edit
           </Button>
           <Popconfirm title="Are you sure you want to delete this fine?" onConfirm={() => deleteFine(record._id)}>
-            <Button size="small" type="default" danger className="rounded-full font-poppins" icon={<Trash2 className="w-4 h-4" />}>
+            <Button size="small" type="default" danger className="rounded-full font-poppins" icon={<MdDelete className="w-4 h-4" />}>
               Delete
             </Button>
           </Popconfirm>
@@ -157,7 +157,7 @@ export default function FineManager({ token }) {
         className="!bg-black/25 !border-0 font-poppins"
         title={
           <div className="flex items-center gap-2 text-green-400 font-bold text-lg">
-            <DollarSign size={18} />
+            <MdAttachMoney size={18} />
             Fine Manager
           </div>
         }
