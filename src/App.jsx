@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AuthForm from './pages/AuthForm';
 import AdminDashboard from "./pages/AdminDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
-import { api, authHeader } from './utils/api';
+import { api, authHeader, setInitialLoadComplete } from './utils/api';
 import { socket } from './utils/socket';
 
 // --- Context Setup ---
@@ -42,7 +42,12 @@ export const AuthProvider = ({ children }) => {
             }
 
         } catch (error) {
-            console.error("Token verification failed:", error);
+            // Only log unexpected errors (not 401 unauthorized)
+            if (error.response?.status !== 401) {
+                console.error("Unexpected token verification error:", error);
+            }
+            
+            // Clean up invalid token silently
             localStorage.removeItem('token');
             sessionStorage.removeItem('token');
             setUser(null);
@@ -50,6 +55,8 @@ export const AuthProvider = ({ children }) => {
             if (socket.connected) socket.disconnect();
         } finally {
             setIsLoading(false);
+            // Mark initial load as complete after first token verification attempt
+            setInitialLoadComplete();
         }
     };
 

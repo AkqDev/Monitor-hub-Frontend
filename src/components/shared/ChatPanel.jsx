@@ -1,18 +1,36 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import axios from "axios";
 import { 
   Layout, Card, Input, Button, List, Spin, message, 
   Dropdown, Avatar, Tooltip, Typography, Popover, 
   Upload, Modal, Form, Badge, Tag, Segmented
 } from "antd";
 import { 
-  Send, PhoneCall, Video, Smile, Paperclip, 
-  Image, File, Mic, MoreVertical, Edit2, 
-  Pin, Trash2, Search, Eye, EyeOff, 
-  Download, Copy, Flag, Star, Clock,
-  Users, Volume2, VolumeX, Bell, BellOff,
-  Hash, AtSign, Menu, X, Maximize2,
-  MessageSquare, Check, CheckCheck, Plus
-} from "lucide-react";
+  IoSend, IoCall, IoVideocam, IoAttach, 
+  IoImage, IoDocument, IoMic, 
+  IoTrash, IoSearch, IoEye, IoEyeOff, 
+  IoDownload, IoCopy, IoFlag, IoStar, IoTime,
+  IoPeople, IoVolumeHigh, IoVolumeMute, IoNotifications, IoNotificationsOff,
+  IoAt, IoMenu, IoClose,
+  IoChatbubble, IoCheckmark, IoAdd
+} from "react-icons/io5";
+import { 
+  MdPhone, MdVideoCall, MdMic, MdMoreVert, MdEdit, MdPushPin, MdDelete,
+  MdSearch, MdVisibility, MdVisibilityOff, MdDownload, MdContentCopy,
+  MdFlag, MdStar, MdSchedule, MdGroup, MdVolumeUp, MdVolumeOff,
+  MdNotifications, MdNotificationsOff, MdAlternateEmail, MdMenu, MdClose,
+  MdFullscreen, MdChat, MdCheck, MdDoneAll, MdAdd, MdAttachFile,
+  MdImage, MdInsertDriveFile
+} from "react-icons/md";
+import { 
+  FaPaperclip, FaSmile, FaPaperPlane, FaMapPin, FaEllipsisV, FaUsers, FaBell, FaVolumeUp, FaHeart
+} from "react-icons/fa";
+import { 
+  BiMessageSquare, BiCheck, BiCheckDouble
+} from "react-icons/bi";
+import { 
+  AiOutlineClose
+} from "react-icons/ai";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import moment from "moment";
@@ -49,6 +67,9 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
   
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const audioInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const chatContainerRef = useRef(null);
 
@@ -461,19 +482,40 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
       return;
     }
 
+    if (!file) {
+      message.error("No file selected");
+      return;
+    }
+
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      message.error("File size must be less than 10MB");
+      return;
+    }
+
+    console.log("Uploading file:", {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
+
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const res = await api.post(
-        "/api/chat/upload",
+      // Use direct axios call to avoid default Content-Type header
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/chat/upload`,
         formData,
         {
-          ...authHeader(token),
-          "Content-Type": "multipart/form-data"
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
         }
       );
+
+      console.log("Upload response:", res.data);
 
       const messageData = {
         recipientId: selectedRoom._id,
@@ -491,9 +533,71 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
       });
     } catch (error) {
       console.error("File upload error:", error);
-      message.error("Failed to upload file");
+      const errorMessage = error.response?.data?.error || "Failed to upload file";
+      message.error(errorMessage);
     } finally {
       setUploading(false);
+    }
+  };
+
+  // Camera Photo Capture
+  const handleCameraCapture = async (file) => {
+    if (!file) return;
+    await handleFileUpload(file);
+  };
+
+  // Video Recording
+  const handleVideoCapture = async (file) => {
+    if (!file) return;
+    await handleFileUpload(file);
+  };
+
+  // Audio Recording
+  const handleAudioCapture = async (file) => {
+    if (!file) return;
+    await handleFileUpload(file);
+  };
+
+  // Start Audio Recording
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/wav' });
+        const file = new File([blob], `audio-${Date.now()}.wav`, { type: 'audio/wav' });
+        handleAudioCapture(file);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+
+      // Show recording modal
+      Modal.confirm({
+        title: 'Recording Audio',
+        content: 'Click OK to stop recording and send the audio message.',
+        okText: 'Stop & Send',
+        cancelText: 'Cancel',
+        onOk: () => {
+          mediaRecorder.stop();
+        },
+        onCancel: () => {
+          mediaRecorder.stop();
+          stream.getTracks().forEach(track => track.stop());
+        }
+      });
+
+    } catch (error) {
+      console.error("Audio recording error:", error);
+      message.error("Failed to access microphone");
     }
   };
 
@@ -700,7 +804,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
             <div className="chat-header">
               <Button
                 type="text"
-                icon={sidebarCollapsed ? <Menu /> : <X />}
+                icon={sidebarCollapsed ? <IoMenu /> : <AiOutlineClose />}
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 className="sidebar-toggle"
               />
@@ -725,7 +829,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                     </Title>
                     {selectedRoom?.isGroup && (
                       <Tag color="blue" className="ml-2">
-                        <Users size={12} /> Group
+                        <FaUsers size={12} /> Group
                       </Tag>
                     )}
                   </div>
@@ -758,13 +862,13 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
             selectedRoom && (
               <div className="chat-actions">
                 <Tooltip title="Search">
-                  <Button type="text" icon={<Search />} />
+                  <Button type="text" icon={<IoSearch className="text-blue-400" />} />
                 </Tooltip>
                 
                 <Tooltip title="Voice Call">
                   <Button 
                     type="text" 
-                    icon={<PhoneCall />}
+                    icon={<MdPhone className="text-green-400" />}
                     onClick={() => startCall('audio')}
                     disabled={!isSocketConnected}
                   />
@@ -773,7 +877,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                 <Tooltip title="Video Call">
                   <Button 
                     type="text" 
-                    icon={<Video />}
+                    icon={<MdVideoCall className="text-purple-400" />}
                     onClick={() => startCall('video')}
                     disabled={!isSocketConnected}
                   />
@@ -790,40 +894,40 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                             {
                               key: 'chat',
                               label: 'Chat',
-                              icon: <MessageSquare size={14} />
+                              icon: <BiMessageSquare size={14} />
                             },
                             {
                               key: 'media',
                               label: 'Media',
-                              icon: <Image size={14} />
+                              icon: <IoImage size={14} className="text-pink-400" />
                             },
                             {
                               key: 'files',
                               label: 'Files',
-                              icon: <File size={14} />
+                              icon: <IoDocument size={14} className="text-orange-400" />
                             }
                           ]
                         },
                         {
                           key: 'notifications',
                           label: 'Notifications',
-                          icon: <Bell size={14} />
+                          icon: <FaBell size={14} />
                         },
                         {
                           key: 'mute',
                           label: 'Mute Chat',
-                          icon: <VolumeX size={14} />
+                          icon: <FaVolumeUp size={14} />
                         },
                         {
                           key: 'clear',
                           label: 'Clear Chat',
-                          icon: <Trash2 size={14} />,
+                          icon: <IoTrash size={14} className="text-red-400" />,
                           danger: true
                         }
                       ]
                     }}
                   >
-                    <Button type="text" icon={<MoreVertical />} />
+                    <Button type="text" icon={<FaEllipsisV className="text-gray-400" />} />
                   </Dropdown>
                 </Tooltip>
               </div>
@@ -834,9 +938,9 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
           {selectedRoom && (
             <Segmented
               options={[
-                { label: 'Chat', value: 'chat', icon: <MessageSquare size={14} /> },
-                { label: 'Media', value: 'media', icon: <Image size={14} /> },
-                { label: 'Files', value: 'files', icon: <File size={14} /> }
+                { label: 'Chat', value: 'chat', icon: <IoChatbubble size={14} className="text-blue-400" /> },
+                { label: 'Media', value: 'media', icon: <IoImage size={14} className="text-pink-400" /> },
+                { label: 'Files', value: 'files', icon: <IoDocument size={14} className="text-orange-400" /> }
               ]}
               value={viewMode}
               onChange={setViewMode}
@@ -847,7 +951,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
           {/* Pinned Messages */}
           {pinnedMessages.length > 0 && (
             <div className="pinned-messages">
-              <Pin size={14} />
+              <FaMapPin size={14} className="text-yellow-400" />
               <span>Pinned Messages</span>
               <List
                 dataSource={pinnedMessages.slice(0, 2)}
@@ -870,7 +974,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
               </div>
               <Button 
                 type="text" 
-                icon={<X />} 
+                icon={<AiOutlineClose />} 
                 size="small"
                 onClick={() => setReplyingTo(null)}
               />
@@ -882,7 +986,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
             <div className="messages-container" ref={chatContainerRef}>
               {filteredMessages.length === 0 ? (
                 <div className="empty-chat">
-                  <MessageSquare size={64} />
+                  <BiMessageSquare size={64} />
                   <Title level={4}>
                     {isSocketConnected ? "No messages yet" : "Not connected"}
                   </Title>
@@ -955,10 +1059,27 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                                       src={att.url} 
                                       alt="Attachment" 
                                       className="attachment-image"
+                                      style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px' }}
                                     />
+                                  ) : att.type?.startsWith('video/') ? (
+                                    <video 
+                                      src={att.url} 
+                                      controls 
+                                      className="attachment-video"
+                                      style={{ maxWidth: '300px', maxHeight: '200px', borderRadius: '8px' }}
+                                    />
+                                  ) : att.type?.startsWith('audio/') ? (
+                                    <div className="attachment-audio" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: '#f5f5f5', borderRadius: '8px', minWidth: '200px' }}>
+                                      <IoMic size={20} className="text-red-400" />
+                                      <audio 
+                                        src={att.url} 
+                                        controls 
+                                        style={{ flex: 1 }}
+                                      />
+                                    </div>
                                   ) : (
                                     <div className="attachment-file">
-                                      <File size={16} />
+                                      <MdInsertDriveFile size={16} className="text-blue-400" />
                                       <a href={att.url} download target="_blank" rel="noopener noreferrer">
                                         {att.name}
                                       </a>
@@ -990,9 +1111,9 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                               {msg.senderId === userId && (
                                 <>
                                   {msg.readBy?.length > 0 ? (
-                                    <CheckCheck size={14} className="text-blue-500" />
+                                    <BiCheckDouble size={14} className="text-blue-500" />
                                   ) : (
-                                    <Check size={14} className="text-gray-400" />
+                                    <BiCheck size={14} className="text-gray-400" />
                                   )}
                                   {msg.readBy?.length > 0 && (
                                     <span className="read-by">
@@ -1011,40 +1132,40 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                                     {
                                       key: 'reply',
                                       label: 'Reply',
-                                      icon: <MessageSquare size={14} />,
+                                      icon: <BiMessageSquare size={14} />,
                                       onClick: () => handleMessageAction('reply', msg),
                                       disabled: msg.isPending
                                     },
                                     msg.senderId === userId && {
                                       key: 'edit',
                                       label: 'Edit',
-                                      icon: <Edit2 size={14} />,
+                                      icon: <MdEdit size={14} className="text-blue-400" />,
                                       onClick: () => handleMessageAction('edit', msg),
                                       disabled: msg.isPending
                                     },
                                     {
                                       key: 'react',
                                       label: 'React',
-                                      icon: <Smile size={14} />,
+                                      icon: <FaSmile size={14} className="text-yellow-400" />,
                                       disabled: msg.isPending
                                     },
                                     {
                                       key: 'pin',
                                       label: msg.pinned ? 'Unpin' : 'Pin',
-                                      icon: <Pin size={14} />,
+                                      icon: <MdPushPin size={14} className="text-orange-400" />,
                                       onClick: () => handleMessageAction('pin', msg),
                                       disabled: msg.isPending
                                     },
                                     {
                                       key: 'copy',
                                       label: 'Copy',
-                                      icon: <Copy size={14} />,
+                                      icon: <MdContentCopy size={14} className="text-green-400" />,
                                       onClick: () => handleMessageAction('copy', msg)
                                     },
                                     (msg.senderId === userId || selectedRoom?.isGroup) && {
                                       key: 'delete',
                                       label: 'Delete',
-                                      icon: <Trash2 size={14} />,
+                                      icon: <MdDelete size={14} className="text-red-400" />,
                                       danger: true,
                                       onClick: () => handleMessageAction('delete', msg),
                                       disabled: msg.isPending
@@ -1052,7 +1173,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                                     {
                                       key: 'report',
                                       label: 'Report',
-                                      icon: <Flag size={14} />,
+                                      icon: <MdFlag size={14} className="text-red-500" />,
                                       danger: true
                                     }
                                   ].filter(Boolean)
@@ -1061,7 +1182,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                               >
                                 <Button 
                                   type="text" 
-                                  icon={<MoreVertical size={14} />}
+                                  icon={<FaEllipsisV size={14} className="text-gray-400" />}
                                   size="small"
                                   disabled={msg.isPending}
                                 />
@@ -1082,9 +1203,21 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                                   alt="" 
                                   className="media-image"
                                 />
+                              ) : att.type?.startsWith('video/') ? (
+                                <video 
+                                  src={att.url} 
+                                  controls 
+                                  className="media-video"
+                                  style={{ maxWidth: '200px', maxHeight: '150px' }}
+                                />
+                              ) : att.type?.startsWith('audio/') ? (
+                                <div className="audio-preview" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: '#f0f0f0', borderRadius: '8px' }}>
+                                  <IoMic size={20} className="text-red-400" />
+                                  <span>{att.name}</span>
+                                </div>
                               ) : (
                                 <div className="file-preview">
-                                  <File size={24} />
+                                  <MdInsertDriveFile size={24} className="text-blue-400" />
                                   <span>{att.name}</span>
                                 </div>
                               )}
@@ -1114,27 +1247,36 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                     {
                       key: 'image',
                       label: 'Image',
-                      icon: <Image size={14} />,
+                      icon: <MdImage size={14} className="text-pink-400" />,
                       onClick: () => fileInputRef.current?.click(),
                       disabled: !isSocketConnected
                     },
                     {
                       key: 'file',
                       label: 'File',
-                      icon: <File size={14} />,
+                      icon: <MdInsertDriveFile size={14} className="text-blue-400" />,
                       onClick: () => fileInputRef.current?.click(),
                       disabled: !isSocketConnected
                     },
                     {
                       key: 'camera',
                       label: 'Camera',
-                      icon: <Video size={14} />,
+                      icon: <MdVideoCall size={14} className="text-green-400" />,
+                      onClick: () => cameraInputRef.current?.click(),
+                      disabled: !isSocketConnected
+                    },
+                    {
+                      key: 'video',
+                      label: 'Video',
+                      icon: <IoVideocam size={14} className="text-purple-400" />,
+                      onClick: () => videoInputRef.current?.click(),
                       disabled: !isSocketConnected
                     },
                     {
                       key: 'audio',
                       label: 'Audio Message',
-                      icon: <Mic size={14} />,
+                      icon: <IoMic size={14} className="text-red-400" />,
+                      onClick: startAudioRecording,
                       disabled: !isSocketConnected
                     }
                   ]
@@ -1143,7 +1285,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
               >
                 <Button 
                   type="text" 
-                  icon={<Paperclip />} 
+                  icon={<FaPaperclip className="text-gray-400 hover:text-blue-400" />} 
                   className="input-action-btn"
                   loading={uploading}
                   disabled={!isSocketConnected}
@@ -1154,9 +1296,58 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
                 type="file"
                 ref={fileInputRef}
                 style={{ display: 'none' }}
-                onChange={(e) => handleFileUpload(e.target.files[0])}
-                multiple
-                accept="image/*,.pdf,.doc,.docx,.txt"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(e.target.files[0]);
+                    // Reset the input so the same file can be uploaded again
+                    e.target.value = '';
+                  }
+                }}
+                accept="image/*,.pdf,.doc,.docx,.txt,.mp3,.mp4,.wav,.avi,.mov,.wmv,.flv,.webm,.ogg,.aac,.m4a"
+              />
+
+              {/* Camera Input */}
+              <input
+                type="file"
+                ref={cameraInputRef}
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleCameraCapture(e.target.files[0]);
+                    e.target.value = '';
+                  }
+                }}
+                accept="image/*"
+                capture="environment"
+              />
+
+              {/* Video Input */}
+              <input
+                type="file"
+                ref={videoInputRef}
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleVideoCapture(e.target.files[0]);
+                    e.target.value = '';
+                  }
+                }}
+                accept="video/*"
+                capture="environment"
+              />
+
+              {/* Audio Input (for file selection, not recording) */}
+              <input
+                type="file"
+                ref={audioInputRef}
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleAudioCapture(e.target.files[0]);
+                    e.target.value = '';
+                  }
+                }}
+                accept="audio/*"
               />
 
               {/* Emoji Picker */}
@@ -1184,7 +1375,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
               >
                 <Button 
                   type="text" 
-                  icon={<Smile />}
+                  icon={<FaSmile className="text-yellow-400 hover:text-yellow-500" />}
                   className="input-action-btn"
                   disabled={!isSocketConnected}
                 />
@@ -1219,7 +1410,7 @@ export default function ChatPanel({ userId, userName, userAvatar, token }) {
               {/* Send Button */}
               <Button
                 type="primary"
-                icon={<Send />}
+                icon={<FaPaperPlane className="text-white" />}
                 onClick={sendMessage}
                 disabled={!input.trim() || !isSocketConnected}
                 className="send-btn"

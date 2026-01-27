@@ -12,18 +12,20 @@ import {
 } from "antd";
 // Import Framer Motion components
 import { motion, AnimatePresence } from "framer-motion";
-// Import all necessary icons from lucide-react
+// Import all necessary icons from react-icons
 import {
-  LogIn,
-  UserPlus,
-  Lock,
-  Mail,
-  Key,
-  User,
-  UserCircle,
-  Shield,
-  ArrowLeft,
-} from "lucide-react";
+  FaSignInAlt,
+  FaUserPlus,
+  FaLock,
+  FaEnvelope,
+  FaKey,
+  FaUser,
+  FaUserCircle,
+  FaArrowLeft,
+} from "react-icons/fa";
+import {
+  MdSecurity,
+} from "react-icons/md";
 import { useAuth } from "../App";
 import axios from "axios";
 
@@ -226,14 +228,14 @@ export default function RoleBasedAuth() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
         <div className="relative">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:rotate-6 transition-transform">
-            <Shield className="w-10 h-10 text-white" />
+            <MdSecurity className="w-10 h-10 text-white" />
           </div>
           <h3 className="text-white mb-2">Admin Access</h3>
           <p className="text-purple-200 text-sm">
             Full system control & monitoring
           </p>
           <div className="mt-6 flex items-center justify-center gap-2 text-blue-300 text-sm">
-            <Lock className="w-4 h-4" />
+            <FaLock className="w-4 h-4" />
             <span>Requires Secret Key</span>
           </div>
         </div>
@@ -247,14 +249,14 @@ export default function RoleBasedAuth() {
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
         <div className="relative">
           <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:rotate-6 transition-transform">
-            <UserCircle className="w-10 h-10 text-white" />
+            <FaUserCircle className="w-10 h-10 text-white" />
           </div>
           <h3 className="text-white mb-2">Employee Access</h3>
           <p className="text-purple-200 text-sm">
             Your daily workspace & tasks
           </p>
           <div className="mt-6 flex items-center justify-center gap-2 text-purple-300 text-sm">
-            <User className="w-4 h-4" />
+            <FaUser className="w-4 h-4" />
             <span className="text-white">Standard Login</span>
           </div>
         </div>
@@ -287,9 +289,9 @@ export default function RoleBasedAuth() {
             } rounded-2xl flex items-center justify-center mb-4 mx-auto`}
           >
             {selectedRole === "admin" ? (
-              <Shield className="w-8 h-8 text-white" />
+              <MdSecurity className="w-8 h-8 text-white" />
             ) : (
-              <UserCircle className="w-8 h-8 text-white" />
+              <FaUserCircle className="w-8 h-8 text-white" />
             )}
           </div>
           <h3 className="text-white font-bold text-lg mb-1">
@@ -323,7 +325,7 @@ export default function RoleBasedAuth() {
                 ]}
               >
                 <Input.Password
-                  prefix={<Key className="w-4 h-4 text-gray-400" />}
+                  prefix={<FaKey className="w-4 h-4 text-gray-400" />}
                   placeholder="Admin Secret Key"
                   size="large"
                   className="!rounded-xl"
@@ -348,7 +350,7 @@ export default function RoleBasedAuth() {
               block
               className="!text-purple-300 flex items-center justify-center gap-1 hover:!text-purple-200"
             >
-              <ArrowLeft className="w-4 h-4" /> Change Role
+              <FaArrowLeft className="w-4 h-4" /> Change Role
             </Button>
           </Form>
         ) : (
@@ -365,7 +367,7 @@ export default function RoleBasedAuth() {
             <TabPane
               tab={
                 <span className="flex items-center gap-1 text-white">
-                  <LogIn className="w-4 h-4" /> Login
+                  <FaSignInAlt className="w-4 h-4" /> Login
                 </span>
               }
               key="login"
@@ -384,7 +386,7 @@ export default function RoleBasedAuth() {
                   ]}
                 >
                   <Input
-                    prefix={<Mail className="w-4 h-4 text-gray-400" />}
+                    prefix={<FaEnvelope className="w-4 h-4 text-gray-400" />}
                     placeholder="Email"
                     size="large"
                     className="!rounded-xl"
@@ -397,7 +399,7 @@ export default function RoleBasedAuth() {
                   ]}
                 >
                   <Input.Password
-                    prefix={<Lock className="w-4 h-4 text-gray-400" />}
+                    prefix={<FaLock className="w-4 h-4 text-gray-400" />}
                     placeholder="Password"
                     size="large"
                     className="!rounded-xl"
@@ -439,7 +441,7 @@ export default function RoleBasedAuth() {
                   block
                   className="!text-purple-300 flex items-center justify-center gap-1 hover:!text-purple-200"
                 >
-                  <ArrowLeft className="w-4 h-4" /> Change Role
+                  <FaArrowLeft className="w-4 h-4" /> Change Role
                 </Button>
               </Form>
             </TabPane>
@@ -447,7 +449,7 @@ export default function RoleBasedAuth() {
             <TabPane
               tab={
                 <span className="flex items-center gap-1 text-white">
-                  <UserPlus className="w-4 h-4" /> Register
+                  <FaUserPlus className="w-4 h-4" /> Register
                 </span>
               }
               key="register"
@@ -465,7 +467,7 @@ export default function RoleBasedAuth() {
                   ]}
                 >
                   <Input
-                    prefix={<User className="w-4 h-4 text-gray-400" />}
+                    prefix={<FaUser className="w-4 h-4 text-gray-400" />}
                     placeholder="Full Name"
                     size="large"
                     className="!rounded-xl"
@@ -479,7 +481,7 @@ export default function RoleBasedAuth() {
                   ]}
                 >
                   <Input
-                    prefix={<Mail className="w-4 h-4 text-gray-400" />}
+                    prefix={<FaEnvelope className="w-4 h-4 text-gray-400" />}
                     placeholder="Email"
                     size="large"
                     className="!rounded-xl"
@@ -492,7 +494,7 @@ export default function RoleBasedAuth() {
                   ]}
                 >
                   <Input.Password
-                    prefix={<Lock className="w-4 h-4 text-gray-400" />}
+                    prefix={<FaLock className="w-4 h-4 text-gray-400" />}
                     placeholder="Password"
                     size="large"
                     className="!rounded-xl"
@@ -514,7 +516,7 @@ export default function RoleBasedAuth() {
                     }
                   >
                     <Input.Password
-                      prefix={<Key className="w-4 h-4 text-gray-400" />}
+                      prefix={<FaKey className="w-4 h-4 text-gray-400" />}
                       placeholder="Admin Secret Key"
                       size="large"
                       className="!rounded-xl"
@@ -539,7 +541,7 @@ export default function RoleBasedAuth() {
                   block
                   className="!text-purple-300 flex items-center justify-center gap-1 hover:!text-purple-200"
                 >
-                  <ArrowLeft className="w-4 h-4" /> Change Role
+                  <FaArrowLeft className="w-4 h-4" /> Change Role
                 </Button>
               </Form>
             </TabPane>
@@ -565,7 +567,7 @@ export default function RoleBasedAuth() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-2xl">
-            <Shield className="w-10 h-10 text-white" />
+            <MdSecurity className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-white mb-2 text-3xl font-bold">
             Workplace Management System

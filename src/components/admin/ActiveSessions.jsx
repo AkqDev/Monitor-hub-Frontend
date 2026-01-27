@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Table, Tag, Tooltip, message } from 'antd'; 
-import { User, Clock, Radio, Activity, CheckCircle, XCircle } from 'lucide-react';
+import { 
+  MdPerson, MdSchedule, MdRadio, MdTrendingUp, MdCheckCircle, MdCancel,
+  MdAccessTime, MdPersonPin
+} from 'react-icons/md';
+import { 
+  FaUserCheck, FaUserTimes, FaClock, FaCircle
+} from 'react-icons/fa';
+import { 
+  IoTime, IoCheckmarkCircle, IoCloseCircle, IoRadio
+} from 'react-icons/io5';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 import { socket } from '../../utils/socket';
@@ -135,7 +144,7 @@ export default function ActiveSessions({ token }) {
 
         return (
             <Tooltip title={`Last seen: ${moment(activityTime).format('LT')} (${statusText})`}>
-                <Tag color={color} icon={<Activity className='w-4 h-4' />}>
+                <Tag color={color} icon={<MdTrendingUp className='w-4 h-4 text-green-400' />}>
                     {statusText}
                 </Tag>
             </Tooltip>
@@ -167,7 +176,7 @@ export default function ActiveSessions({ token }) {
                 return (
                     <Tag 
                         color={isOnline ? 'green' : 'red'} 
-                        icon={<Radio className='w-4 h-4' />}
+                        icon={<IoRadio className='w-4 h-4 text-green-400' />}
                     >
                         {isOnline ? 'Online' : 'Offline'}
                     </Tag>
@@ -182,7 +191,7 @@ export default function ActiveSessions({ token }) {
             render: (status) => (
                 <Tag 
                     color={status === 'Active' ? 'blue' : 'gray'} 
-                    icon={status === 'Active' ? <CheckCircle className='w-4 h-4' /> : <XCircle className='w-4 h-4' />}
+                    icon={status === 'Active' ? <IoCheckmarkCircle className='w-4 h-4 text-blue-400' /> : <IoCloseCircle className='w-4 h-4 text-red-400' />}
                 >
                     {status === 'Active' ? 'Checked In' : 'Not Checked In'}
                 </Tag>
@@ -195,7 +204,7 @@ export default function ActiveSessions({ token }) {
             key: 'checkInTime',
             render: (time) => time ? (
                 <div className="flex items-center gap-1 text-purple-200">
-                    <Clock className='w-4 h-4 text-purple-400' />
+                    <IoTime className='w-4 h-4 text-purple-400' />
                     {moment(time).format('h:mm:ss A')} 
                 </div>
             ) : <span className='text-gray-500'>N/A</span>,
@@ -214,7 +223,7 @@ export default function ActiveSessions({ token }) {
         <Card
             title={
                 <div className="flex items-center gap-2 text-green-500 font-[poppins]">
-                    <User size={16} />
+                    <FaUserCheck size={16} className="text-green-400" />
                     All Employee Status
                 </div>
             }

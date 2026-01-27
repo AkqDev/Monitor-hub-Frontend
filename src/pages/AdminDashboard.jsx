@@ -2,9 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Button, theme, Avatar, Dropdown, Card, Statistic, Row, Col, Spin } from 'antd';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, User, MessageSquare, ListTodo, Video, Monitor, Power,
-  CalendarPlus, DollarSign, Megaphone, Clock, Activity, CheckCircle, Users
-} from 'lucide-react';
+  MdDashboard, MdPerson, MdChat, MdTask, MdVideoCall, MdMonitor, MdPowerSettingsNew,
+  MdEvent, MdAttachMoney, MdCampaign, MdSchedule, MdTrendingUp, MdCheckCircle, MdGroup,
+  MdRefresh
+} from 'react-icons/md';
+import { 
+  FaUsers, FaTasks, FaMoneyBillWave, FaCalendarAlt, FaVideo, FaClock,
+  FaChartLine, FaUserCheck, FaBell, FaEye
+} from 'react-icons/fa';
+import { 
+  IoStatsChart, IoTime, IoCheckmarkCircle, IoAlert, IoRefresh
+} from 'react-icons/io5';
 import { useAuth } from '../App'; 
 import { api, authHeader } from '../utils/api';
 
@@ -17,20 +25,21 @@ import ScreenMonitor from '../components/admin/ScreenMonitor';
 import FineManager from '../components/admin/FineManager'; 
 import EventManagerPanel from '../components/shared/EventManagerPanel'; 
 import AnnouncementManagerPanel from '../components/shared/AnnouncementManagerPanel';
+import JoinMeeting from '../components/meetings/JoinMeeting'
 
 const { Header, Content, Sider } = Layout;
 
 // Sidebar Navigation
 const menuItems = [
-  { key: 'overview', icon: <LayoutDashboard className="w-4 h-4" />, label: 'Overview' },
-  { key: 'sessions', icon: <User className="w-4 h-4" />, label: 'Active Sessions' },
-  { key: 'monitoring', icon: <Monitor className="w-4 h-4" />, label: 'Live Monitoring' },
-  { key: 'tasks', icon: <ListTodo className="w-4 h-4" />, label: 'Task Manager' },
-  { key: 'meetings', icon: <Video className="w-4 h-4" />, label: 'Meeting Manager' },
-  { key: 'events', icon: <CalendarPlus className="w-4 h-4" />, label: 'Event Manager' },
-  { key: 'fines', icon: <DollarSign className="w-4 h-4" />, label: 'Fine Manager' },
-  { key: 'announcements', icon: <Megaphone className="w-4 h-4" />, label: 'Announcements' },
-  { key: 'chat', icon: <MessageSquare className="w-4 h-4" />, label: 'Global Chat' },
+  { key: 'overview', icon: <MdDashboard className="w-4 h-4 text-blue-400" />, label: 'Overview' },
+  { key: 'sessions', icon: <FaUserCheck className="w-4 h-4 text-green-400" />, label: 'Active Sessions' },
+  { key: 'monitoring', icon: <MdMonitor className="w-4 h-4 text-purple-400" />, label: 'Live Monitoring' },
+  { key: 'tasks', icon: <FaTasks className="w-4 h-4 text-orange-400" />, label: 'Task Manager' },
+  { key: 'meetings', icon: <MdVideoCall className="w-4 h-4 text-pink-400" />, label: 'Meeting Manager' },
+  { key: 'events', icon: <FaCalendarAlt className="w-4 h-4 text-cyan-400" />, label: 'Event Manager' },
+  { key: 'fines', icon: <FaMoneyBillWave className="w-4 h-4 text-red-400" />, label: 'Fine Manager' },
+  { key: 'announcements', icon: <MdCampaign className="w-4 h-4 text-yellow-400" />, label: 'Announcements' },
+  { key: 'chat', icon: <MdChat className="w-4 h-4 text-indigo-400" />, label: 'Global Chat' },
 ];
 
 export default function AdminDashboard() {
@@ -148,7 +157,7 @@ export default function AdminDashboard() {
       key: 'logout',
       label: 'Logout',
       className: '!text-green-500 !font-semibold !font-[poppins] !hover:bg-transparent',
-      icon: <Power className="w-4 h-4" />,
+      icon: <MdPowerSettingsNew className="w-4 h-4 text-red-400" />,
       danger: true,
       onClick: handleLogout,
     },
@@ -220,7 +229,7 @@ export default function AdminDashboard() {
 
           <Dropdown menu={{ items: userDropdownItems }} trigger={['click']} >
             <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-              <Avatar className="!bg-green-500 shadow-md" icon={<User size={16} />} />
+              <Avatar className="!bg-green-500 shadow-md" icon={<MdPerson size={16} className="text-white" />} />
               <span className="text-gray-100 font-semibold hidden sm:block font-[poppins] uppercase">{user?.name}</span>
             </div>
           </Dropdown>
@@ -246,6 +255,10 @@ export default function AdminDashboard() {
             <Route path="fines" element={<FineManager token={token} />} />
             <Route path="announcements" element={<AnnouncementManagerPanel token={token} isAdmin />} />
             <Route path="chat" element={<AdminChat userId={user?._id} userName={user?.name} token={token} />} />
+
+            {/* ADD THESE MEETING JOIN ROUTES */}
+  <Route path="meetings/join/:meetingId" element={<JoinMeeting />} />
+  <Route path="meeting/:meetingId" element={<JoinMeeting />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Content>
@@ -262,56 +275,56 @@ const OverviewDashboard = ({ user, stats, loading, token, onRefresh }) => {
       title: 'Active Sessions', 
       value: stats.activeSessions, 
       suffix: `/${stats.totalEmployees}`,
-      icon: <Activity className="w-5 h-5" />,
+      icon: <MdTrendingUp className="w-5 h-5" />,
       color: '#10B981'
     },
     { 
       title: 'Total Employees', 
       value: stats.totalEmployees, 
       suffix: '',
-      icon: <Users className="w-5 h-5" />,
+      icon: <FaUsers className="w-5 h-5" />,
       color: '#3B82F6'
     },
     { 
       title: 'Pending Tasks', 
       value: stats.pendingTasks, 
       suffix: ' pending',
-      icon: <ListTodo className="w-5 h-5" />,
+      icon: <FaTasks className="w-5 h-5" />,
       color: '#F59E0B'
     },
     { 
       title: 'Unpaid Fines', 
       value: stats.unpaidFines, 
       suffix: ' fines',
-      icon: <DollarSign className="w-5 h-5" />,
+      icon: <MdAttachMoney className="w-5 h-5" />,
       color: '#EF4444'
     },
     { 
       title: 'Total Fines', 
       value: `PKR ${stats.totalFines.toLocaleString()}`, 
       suffix: '',
-      icon: <DollarSign className="w-5 h-5" />,
+      icon: <FaMoneyBillWave className="w-5 h-5" />,
       color: '#8B5CF6'
     },
     { 
       title: 'Upcoming Meetings', 
       value: stats.upcomingMeetings, 
       suffix: ' today',
-      icon: <Video className="w-5 h-5" />,
+      icon: <FaVideo className="w-5 h-5" />,
       color: '#EC4899'
     },
     { 
       title: "Today's Events", 
       value: stats.todayEvents, 
       suffix: ' events',
-      icon: <CalendarPlus className="w-5 h-5" />,
+      icon: <FaCalendarAlt className="w-5 h-5" />,
       color: '#06B6D4'
     },
     { 
       title: 'Last Updated', 
       value: 'Just now', 
       suffix: '',
-      icon: <Clock className="w-5 h-5" />,
+      icon: <IoTime className="w-5 h-5" />,
       color: '#6B7280'
     }
   ];
@@ -330,7 +343,7 @@ const OverviewDashboard = ({ user, stats, loading, token, onRefresh }) => {
             type="primary" 
             onClick={onRefresh}
             loading={loading}
-            icon={<Clock className="w-4 h-4" />}
+            icon={<IoRefresh className="w-4 h-4" />}
             className="!bg-green-600 !border-0 !font-semibold"
           >
             Refresh Data
@@ -407,7 +420,7 @@ const OverviewDashboard = ({ user, stats, loading, token, onRefresh }) => {
                       <h3 className="text-white font-semibold text-lg">Assign New Task</h3>
                       <p className="text-blue-200">Create and assign tasks to employees</p>
                     </div>
-                    <ListTodo className="w-8 h-8 text-blue-400" />
+                    <FaTasks className="w-8 h-8 text-blue-400" />
                   </div>
                 </Card>
               </Col>
@@ -421,7 +434,7 @@ const OverviewDashboard = ({ user, stats, loading, token, onRefresh }) => {
                       <h3 className="text-white font-semibold text-lg">Schedule Meeting</h3>
                       <p className="text-green-200">Set up new team meetings</p>
                     </div>
-                    <Video className="w-8 h-8 text-green-400" />
+                    <FaVideo className="w-8 h-8 text-green-400" />
                   </div>
                 </Card>
               </Col>
@@ -435,7 +448,7 @@ const OverviewDashboard = ({ user, stats, loading, token, onRefresh }) => {
                       <h3 className="text-white font-semibold text-lg">Assign Fine</h3>
                       <p className="text-purple-200">Manage employee fines</p>
                     </div>
-                    <DollarSign className="w-8 h-8 text-purple-400" />
+                    <FaMoneyBillWave className="w-8 h-8 text-purple-400" />
                   </div>
                 </Card>
               </Col>

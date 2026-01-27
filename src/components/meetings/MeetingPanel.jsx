@@ -14,7 +14,8 @@ import {
   Tooltip,
   Avatar,
   List,
-  Tabs
+  Tabs,
+  notification
 } from 'antd';
 import { 
   Video, 
@@ -53,6 +54,8 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
   const [password, setPassword] = useState('');
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+  const userRole = 'employee'; // Since this is employee component
 
   const fetchMeetings = useCallback(async () => {
     setLoading(true);
@@ -69,30 +72,93 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
   useEffect(() => {
     fetchMeetings();
 
-    socket.on("meetingStarting", ({ title, meetingId }) => {
-      message.info(`🔔 Meeting "${title}" is starting now!`);
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    // Listen for meeting notifications
+    socket.on("newMeetingScheduled", (data) => {
+      showNotification(
+        "New Meeting Scheduled",
+        data.message,
+        "info",
+        () => {
+          const meeting = meetings.find(m => m.meetingId === data.meeting.meetingId);
+          if (meeting) {
+            handleJoinMeeting(meeting);
+          }
+        }
+      );
       fetchMeetings();
+    });
+
+    socket.on("meetingStartingSoon", (data) => {
+      showNotification(
+        "Meeting Starting Soon",
+        data.message,
+        "warning",
+        () => {
+          const meeting = meetings.find(m => m.meetingId === data.meetingId);
+          if (meeting) {
+            handleJoinMeeting(meeting);
+          }
+        }
+      );
       
-      // Auto-join if user is already viewing meetings
-      const meeting = meetings.find(m => m.meetingId === meetingId);
-      if (meeting && moment(meeting.scheduledTime).isBefore(moment())) {
-        handleJoinMeeting(meeting);
+      // Browser notification
+      if (Notification.permission === "granted") {
+        new Notification("Meeting Starting Soon", {
+          body: data.message,
+          icon: "/favicon.ico"
+        });
       }
     });
 
-    socket.on("meetingEnded", ({ meetingId }) => {
-      message.warning(`Meeting has ended.`);
-      if (currentMeetingId === meetingId) {
+    socket.on("meetingCancelled", (data) => {
+      showNotification(
+        "Meeting Cancelled",
+        data.message,
+        "error"
+      );
+      fetchMeetings();
+      
+      if (currentMeetingId === data.meetingId) {
         setCurrentMeetingId(null);
+        message.warning("The meeting you were in has been cancelled");
+      }
+    });
+
+    socket.on("meetingEnded", (data) => {
+      showNotification(
+        "Meeting Ended",
+        `"${data.title}" has ended. Duration: ${data.duration} minutes`,
+        "info"
+      );
+      
+      if (currentMeetingId === data.meetingId) {
+        setCurrentMeetingId(null);
+        message.info("Meeting has ended");
       }
       fetchMeetings();
     });
 
     return () => {
-      socket.off("meetingStarting");
+      socket.off("newMeetingScheduled");
+      socket.off("meetingStartingSoon");
+      socket.off("meetingCancelled");
       socket.off("meetingEnded");
     };
   }, [fetchMeetings, currentMeetingId, meetings]);
+
+  const showNotification = (title, description, type, onClick) => {
+    notification[type]({
+      message: title,
+      description: description,
+      duration: 5,
+      onClick: onClick
+    });
+  };
 
   const canJoinMeeting = (scheduledTime) => moment().isSameOrAfter(moment(scheduledTime));
 
@@ -109,7 +175,8 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
       return;
     }
 
-    proceedToJoinMeeting();
+    // Navigate to join page
+    navigate(`/${userRole}/meetings/join/${meeting.meetingId}`);
   };
 
   const proceedToJoinMeeting = async () => {
@@ -135,8 +202,8 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
     }
 
     setPasswordModalVisible(false);
-    setCurrentMeetingId(selectedMeeting.meetingId);
-    message.success(`Joining ${selectedMeeting.title}...`);
+    // Navigate to join page
+    navigate(`/${userRole}/meetings/join/${selectedMeeting.meetingId}`);
   };
 
   const handleLeaveMeeting = () => {
@@ -151,7 +218,7 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
   };
 
   const copyMeetingLink = (meetingId) => {
-    const meetingLink = `${window.location.origin}/meeting/${meetingId}`;
+    const meetingLink = `${window.location.origin}/${userRole}/meetings/join/${meetingId}`;
     navigator.clipboard.writeText(meetingLink);
     message.success('Meeting link copied!');
   };
@@ -393,7 +460,6 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
         )}}
       />
 
-      {/* Password Modal */}
       <Modal
         title={
           <div className="flex items-center gap-2 text-yellow-500">
@@ -424,7 +490,6 @@ export default function MeetingPanel({ userId, userName, token, userAvatar }) {
         </div>
       </Modal>
 
-      {/* Meeting Details Modal */}
       <Modal
         title={
           <div className="flex items-center gap-2">

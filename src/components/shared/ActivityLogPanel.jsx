@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, List, Tag, Spin, Tooltip, message } from 'antd';
-import { History, User, Shield, Briefcase } from 'lucide-react';
+import { 
+  FaHistory, FaUser, FaShield, FaBriefcase 
+} from 'react-icons/fa';
+import { 
+  MdHistory, MdPerson, MdSecurity, MdWork 
+} from 'react-icons/md';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 
@@ -39,13 +44,13 @@ export default function ActivityLogPanel({ token, isAdmin = false }) {
     }, [fetchLogs]);
 
     const getIconByRole = (role) => {
-        if (role === 'admin') return <Shield className='w-4 h-4 text-red-400' />;
-        return <Briefcase className='w-4 h-4 text-blue-400' />;
+        if (role === 'admin') return <FaShield className='w-4 h-4 text-red-400' />;
+        return <FaBriefcase className='w-4 h-4 text-blue-400' />;
     };
 
     return (
         <Card
-            title={<div className="flex items-center gap-2 text-gray-400 font-semibold"><History className='w-5 h-5 text-gray-400' /> {isAdmin ? 'System Activity Feed' : 'My Recent Activity'}</div>}
+            title={<div className="flex items-center gap-2 text-gray-400 font-semibold"><FaHistory className='w-5 h-5 text-green-400' /> {isAdmin ? 'System Activity Feed' : 'My Recent Activity'}</div>}
             className="!bg-black/25 backdrop-blur-xl rounded-2xl border border-white/20 activity-card"
             // FIX: Added Ant Design specific styles to ensure dark theme compatibility
             headStyle={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff' }}

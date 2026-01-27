@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Card, Button, Table, Modal, Form, Input, Popconfirm, Tag, message } from 'antd';
-import { Megaphone, Plus, Edit, Trash } from 'lucide-react';
+import { 
+  FaBullhorn, FaPlus, FaEdit, FaTrash 
+} from 'react-icons/fa';
+import { 
+  MdCampaign, MdAdd, MdEdit, MdDelete 
+} from 'react-icons/md';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
 
@@ -103,9 +108,9 @@ export default function AnnouncementManagerPanel({ token, isAdmin }) {
       title: 'Actions',
       render: (_, r) => (
         <div className="flex gap-2">
-          <Button size="small" onClick={() => { setEditing(r); form.setFieldsValue(r); setOpen(true); }} className='!bg-white !focus-0 !border-0 !text-green-500 !font-[poppins] !font-semibold' icon={<Edit size={14} />} />
+          <Button size="small" onClick={() => { setEditing(r); form.setFieldsValue(r); setOpen(true); }} className='!bg-white !focus-0 !border-0 !text-green-500 !font-[poppins] !font-semibold' icon={<FaEdit size={14} className="text-blue-400" />} />
           <Popconfirm title="Delete announcement?" onConfirm={() => remove(r._id)}>
-            <Button size="small" className='!bg-green-500 !focus-0 !border-0 !text-white !font-[poppins] !font-semibold' icon={<Trash size={14} />} />
+            <Button size="small" className='!bg-green-500 !focus-0 !border-0 !text-white !font-[poppins] !font-semibold' icon={<FaTrash size={14} className="text-red-400" />} />
           </Popconfirm>
         </div>
       ),
@@ -117,14 +122,14 @@ export default function AnnouncementManagerPanel({ token, isAdmin }) {
       className="!bg-black/25 !border-0 rounded-2xl"
       title={
         <div className="flex items-center gap-2 !text-green-500 !font-bold !font-[poppins]">
-          <Megaphone size={18} /> Announcement Manager
+          <FaBullhorn size={18} className="text-green-400" /> Announcement Manager
         </div>
       }
       extra={
         isAdmin && (
           <Button
             className="!bg-green-500 !text-white !font-semibold !focus-0 !border-0"
-            icon={<Plus size={16} />}
+            icon={<FaPlus size={16} className="text-white" />}
             onClick={() => setOpen(true)}
           >
             New Announcement

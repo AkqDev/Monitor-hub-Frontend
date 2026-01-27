@@ -13,6 +13,7 @@ import AnnouncementManagerPanel from "../components/shared/AnnouncementManagerPa
 import EventManagerPanel from "../components/shared/EventManagerPanel";
 import MyFinesPanel from '../components/employee/MyFinesPanel';
 import ScreenMonitoring from '../components/employee/ScreenMonitoring';
+import JoinMeeting from '../components/meetings/JoinMeeting';
 import { api, authHeader } from '../utils/api';
 
 const { Header, Content, Sider } = Layout;
@@ -309,6 +310,9 @@ export default function EmployeeDashboard() {
                         <Route path="events" element={<EventManagerPanel token={token} isAdmin={false} />} />
                         <Route path="fines" element={<MyFinesPanel token={token} />} />
                         <Route path="screen-monitoring" element={<ScreenMonitoring socketToken={token} user={user} />} />
+                          {/* ADD THESE MEETING JOIN ROUTES */}
+  <Route path="meetings/join/:meetingId" element={<JoinMeeting />} />
+  <Route path="meeting/:meetingId" element={<JoinMeeting />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Content>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Card, 
   Button, 
@@ -31,7 +32,8 @@ import {
   Copy,
   Share2,
   Calendar,
-  Eye
+  Eye,
+  LogIn
 } from 'lucide-react';
 import moment from 'moment';
 import { api, authHeader } from '../../utils/api';
@@ -47,6 +49,8 @@ export default function MeetingManager({ token }) {
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [form] = Form.useForm();
   const [settingsForm] = Form.useForm();
+  const navigate = useNavigate();
+  const userRole = 'admin'; // Since this is admin component
 
   const fetchMeetings = useCallback(async () => {
     setLoading(true);
@@ -70,7 +74,7 @@ export default function MeetingManager({ token }) {
       const payload = {
         ...values,
         scheduledTime: values.scheduledTime.toISOString(),
-        meetingId: uuidv4().substring(0, 8), // Shorter meeting ID
+        meetingId: uuidv4().substring(0, 8),
         settings: {
           allowScreenShare: values.allowScreenShare ?? true,
           allowChat: values.allowChat ?? true,
@@ -92,8 +96,7 @@ export default function MeetingManager({ token }) {
       setIsModalVisible(false);
       form.resetFields();
       
-      // Copy meeting link to clipboard
-      const meetingLink = `${window.location.origin}/meeting/${payload.meetingId}`;
+      const meetingLink = `${window.location.origin}/${userRole}/meetings/join/${payload.meetingId}`;
       navigator.clipboard.writeText(meetingLink);
       message.info('Meeting link copied to clipboard!');
     } catch (error) {
@@ -130,7 +133,7 @@ export default function MeetingManager({ token }) {
   };
 
   const copyMeetingLink = (meetingId) => {
-    const meetingLink = `${window.location.origin}/meeting/${meetingId}`;
+    const meetingLink = `${window.location.origin}/${userRole}/meetings/join/${meetingId}`;
     navigator.clipboard.writeText(meetingLink);
     message.success('Meeting link copied to clipboard!');
   };
@@ -140,7 +143,7 @@ export default function MeetingManager({ token }) {
       navigator.share({
         title: meeting.title,
         text: `Join ${meeting.title}`,
-        url: `${window.location.origin}/meeting/${meeting.meetingId}`,
+        url: `${window.location.origin}/${userRole}/meetings/join/${meeting.meetingId}`,
       });
     } else {
       copyMeetingLink(meeting.meetingId);
@@ -215,6 +218,29 @@ export default function MeetingManager({ token }) {
           style={{ backgroundColor: '#10b981' }}
         />
       )
+    },
+    {
+      title: 'Join',
+      key: 'join',
+      render: (_, record) => {
+        const canJoin = moment(record.scheduledTime).isSameOrBefore(moment());
+        return (
+          <Tooltip title={canJoin ? "Join Meeting" : "Meeting not started"}>
+            <Button 
+              type="primary"
+              size="small"
+              icon={<LogIn size={14} />}
+              onClick={() => {
+                navigate(`/${userRole}/meetings/join/${record.meetingId}`);
+              }}
+              disabled={!canJoin}
+              className={`!border-0 ${canJoin ? '!bg-green-600 hover:!bg-green-700' : '!bg-gray-700'}`}
+            >
+              Join
+            </Button>
+          </Tooltip>
+        );
+      }
     },
     {
       title: 'Actions',
@@ -353,7 +379,6 @@ export default function MeetingManager({ token }) {
         rowClassName="hover:!bg-gray-800/50"
       />
 
-      {/* Schedule Meeting Modal */}
       <Modal
         title={
           <div className="flex items-center gap-2 text-green-500">
@@ -467,7 +492,6 @@ export default function MeetingManager({ token }) {
         </Form>
       </Modal>
 
-      {/* Settings Modal */}
       <Modal
         title={
           <div className="flex items-center gap-2 text-yellow-500">

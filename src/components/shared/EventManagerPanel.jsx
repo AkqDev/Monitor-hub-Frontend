@@ -13,7 +13,12 @@ import {
   message,
   Spin,
 } from "antd";
-import { CalendarPlus, Trash, Plus, Edit, MapPin, Clock } from "lucide-react";
+import { 
+  MdCalendarToday, MdDelete, MdAdd, MdEdit, MdLocationOn, MdSchedule 
+} from "react-icons/md";
+import { 
+  FaCalendarPlus, FaTrash, FaPlus, FaEdit, FaMapMarkerAlt, FaClock 
+} from "react-icons/fa";
 import moment from "moment";
 import { api, authHeader } from "../../utils/api";
 
@@ -153,7 +158,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
     <Card 
       title={
         <div className="flex items-center gap-2 !text-green-500 !font-xl !font-semibold font-[poppins]">
-          <CalendarPlus className="w-5 h-5" />
+          <FaCalendarPlus className="w-5 h-5 text-green-400" />
           {isAdmin ? "Event Manager" : "Upcoming Events"}
         </div>
       }
@@ -162,7 +167,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
         isAdmin && (
           <Button
             type="primary"
-            icon={<Plus className="w-4 h-4" />}
+            icon={<FaPlus className="w-4 h-4 text-white" />}
             onClick={openCreate}
             className="!bg-green-500 rounded-full !border-0 !outline-0 !font-semibold font-[poppins]"
           >
@@ -188,7 +193,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
                       <Button
                         className="!text-green-500 !bg-gray-200 !rounded-xl !font-semibold font-[poppins]"
                         type="link"
-                        icon={<Edit className="w-4 h-4" />}
+                        icon={<FaEdit className="w-4 h-4 text-blue-400" />}
                         onClick={() => openEdit(event)}
                       >
                         Edit
@@ -201,7 +206,7 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
                           className="!text-gray-200 !bg-green-500 !rounded-xl !font-semibold font-[poppins]"
                           type="link"
                           danger
-                          icon={<Trash className="w-4 h-4" />}
+                          icon={<FaTrash className="w-4 h-4 text-red-400" />}
                         >
                           Delete
                         </Button>
@@ -225,12 +230,12 @@ export default function EventManagerPanel({ token, isAdmin = false }) {
 
                     <div className="flex flex-wrap items-center gap-4 text-xs">
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
+                        <FaMapMarkerAlt className="w-3 h-3 text-red-400" />
                         {event.location}
                       </span>
 
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                        <FaClock className="w-3 h-3 text-blue-400" />
                         {moment(event.date).format("MMM D, YYYY h:mm A")}
                       </span>
                     </div>

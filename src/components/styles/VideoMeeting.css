@@ -1,0 +1,116 @@
+.video-meeting-container {
+  transition: all 0.3s ease;
+}
+
+.video-meeting-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  border-radius: 0;
+}
+
+.dark-table .ant-table {
+  background: transparent;
+}
+
+.dark-table .ant-table-thead > tr > th {
+  background: #1f2937;
+  color: #9ca3af;
+  border-bottom: 1px solid #374151;
+}
+
+.dark-table .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #374151;
+  background: transparent;
+}
+
+.dark-table .ant-table-tbody > tr:hover > td {
+  background: #374151 !important;
+}
+
+.meeting-modal .ant-modal-content {
+  background: #111827;
+  border: 1px solid #374151;
+}
+
+.meeting-modal .ant-modal-header {
+  background: #1f2937;
+  border-bottom: 1px solid #374151;
+}
+
+.meeting-modal .ant-modal-title {
+  color: #10b981;
+}
+
+.meeting-tabs .ant-tabs-tab {
+  color: #9ca3af !important;
+}
+
+.meeting-tabs .ant-tabs-tab-active {
+  color: #10b981 !important;
+}
+
+.meeting-tabs .ant-tabs-ink-bar {
+  background: #10b981;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Video grid responsiveness */
+@media (max-width: 768px) {
+  .video-meeting-container {
+    flex-direction: column;
+  }
+  
+  .video-meeting-container > div:first-child {
+    order: 2;
+  }
+  
+  .video-meeting-container > div:last-child {
+    order: 1;
+  }
+}
+
+/* Custom button styles */
+.btn-control {
+  transition: all 0.2s ease;
+}
+
+.btn-control:hover {
+  transform: scale(1.05);
+}
+
+.btn-control:active {
+  transform: scale(0.95);
+}

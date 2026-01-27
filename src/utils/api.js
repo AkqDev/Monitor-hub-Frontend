@@ -10,10 +10,14 @@ export const api = axios.create({
   timeout: 15000,
 });
 
+// Flag to track if we're in initial app load (to suppress expected 401s)
+let isInitialLoad = true;
+export const setInitialLoadComplete = () => { isInitialLoad = false; };
+
 // Helper function to attach JWT token in headers
 export const authHeader = (token) => {
   if (!token) {
-    console.warn("No token provided to authHeader");
+    // Don't warn for expected cases where token might not exist yet
     return {};
   }
   
@@ -28,12 +32,25 @@ export const authHeader = (token) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API Error:", {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      message: error.message,
-    });
+    // Don't log expected 401 errors for token verification during initial load
+    const isTokenVerification = error.config?.url?.includes('/api/auth/me');
+    const is401 = error.response?.status === 401;
+    
+    if (isTokenVerification && is401 && isInitialLoad) {
+      // This is expected when token is invalid/expired during app startup
+      return Promise.reject(error);
+    }
+    
+    // Log other API errors for debugging (but not during initial load for auth endpoints)
+    if (!(isInitialLoad && is401)) {
+      console.error("API Error:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        message: error.message,
+      });
+    }
+    
     return Promise.reject(error);
   }
 );
